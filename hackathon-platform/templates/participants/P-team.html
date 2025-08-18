@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">👥 Teams</h2>
+    <ul>
+        {% for team in teams %}
+        <li class="border-b p-2 hover:bg-blue-50 dark:hover:bg-gray-700">
+            {{ team.team_name }} <span class="text-sm text-blue-500">({{ team.event_name }})</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
