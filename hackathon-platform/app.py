@@ -1,36 +1,34 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
+from config import Config
+from models import db   # ✅ import db here
 
-# Initialize DB
-db = SQLAlchemy()
 migrate = Migrate()
+jwt = JWTManager()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="templates")
+    app.config.from_object(Config)
 
-    # Load config
-    app.config.from_object("config.Config")
+    # Secret key for flash messages
+    app.secret_key = "supersecret"
 
     # Initialize extensions
-    db.init_app(app)
+    db.init_app(app)       # ✅ attaches db to app
     migrate.init_app(app, db)
+    jwt.init_app(app)
 
     # Register blueprints
     from routes.auth import auth_bp
-    from routes.events import events_bp
-    from routes.teams import teams_bp
-
     app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(events_bp, url_prefix="/events")
-    app.register_blueprint(teams_bp, url_prefix="/teams")
 
     @app.route("/")
     def home():
-        return "🚀 Hackathon Platform Backend is running!"
+        return render_template("login.html")
 
     return app
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host='0.0.0.0',debug=True,port=8000)
+    app.run(debug=True)
