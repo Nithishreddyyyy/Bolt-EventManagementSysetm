@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime
-from models import db   # ✅ import db from models, do NOT create new one
+from models import db   # import db from models, do NOT create new one
 
 class User(db.Model):
     __tablename__ = "Users"
 
-    user_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)   # plain text password
