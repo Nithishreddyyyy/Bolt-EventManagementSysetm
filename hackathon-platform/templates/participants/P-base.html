@@ -12,13 +12,15 @@
   <div class="flex min-h-screen">
     <!-- Sidebar -->
     <aside class="w-64 bg-blue-800 text-white p-6">
-      <h1 class="text-2xl font-bold mb-8">Dashboard</h1>
+      <h1 class="text-2xl font-bold mb-8">
+        <a href="{{ url_for('participant.dashboard') }}" class="hover:text-blue-300">Dashboard</a>
+      </h1>
       <nav>
         <ul class="space-y-4">
-          <li><a href="/events" class="block hover:text-blue-300">📅 Events</a></li>
-          <li><a href="/teams" class="block hover:text-blue-300">👥 Teams</a></li>
-          <li><a href="/submissions" class="block hover:text-blue-300">📑 Submissions</a></li>
-          <li><a href="/announcements" class="block hover:text-blue-300">📢 Announcements</a></li>
+          <li><a href="{{ url_for('participant.events') }}" class="block hover:text-blue-300">📅 Events</a></li>
+          <li><a href="{{ url_for('participant.teams') }}" class="block hover:text-blue-300">👥 Teams</a></li>
+          <li><a href="{{ url_for('participant.submissions') }}" class="block hover:text-blue-300">📑 Submissions</a></li>
+          <li><a href="{{ url_for('participant.announcements') }}" class="block hover:text-blue-300">📢 Announcements</a></li>
         </ul>
       </nav>
     </aside>
