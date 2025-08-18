@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background: linear-gradient(to right,  #e3f2fd, #f1f8e9); height:100vh; display:flex; align-items:center; justify-content:center;">
+
+    <!-- Ghost Background Overlay -->
+    <div style="position:absolute; top:0; left:0; width:100%; height:100%; 
+                background:url('https://www.transparenttextures.com/patterns/white-diamond.png') repeat; 
+                opacity:0.1; z-index:0;"></div>
+
+    <!-- Centered Registration Card -->
+    <div class="card shadow" style="width: 100%; max-width: 450px; z-index:1; border-radius:15px; transition: transform 0.2s;">
+        <div class="card-body p-5">
+            <h2 class="card-title text-center mb-4" style="font-weight:bold; color:#0d47a1;">Create Account</h2>
+            
+            <form method="POST" action="{{ url_for('register') }}">
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="username" class="form-label" style="font-weight:500;">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" required 
+                           style="border-radius:10px; padding:10px; transition: box-shadow 0.3s, transform 0.2s;"
+                           onfocus="this.style.boxShadow='0 0 8px rgba(13,71,161,0.3)'; this.style.transform='scale(1.01)';"
+                           onblur="this.style.boxShadow=''; this.style.transform='scale(1)'">
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label" style="font-weight:500;">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required
+                           style="border-radius:10px; padding:10px; transition: box-shadow 0.3s, transform 0.2s;"
+                           onfocus="this.style.boxShadow='0 0 8px rgba(13,71,161,0.3)'; this.style.transform='scale(1.01)';"
+                           onblur="this.style.boxShadow=''; this.style.transform='scale(1)'">
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3 position-relative">
+                    <label for="password" class="form-label" style="font-weight:500;">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required 
+                           style="border-radius:10px; padding:10px; transition: box-shadow 0.3s, transform 0.2s;"
+                           onfocus="this.style.boxShadow='0 0 8px rgba(13,71,161,0.3)'; this.style.transform='scale(1.01)';"
+                           onblur="this.style.boxShadow=''; this.style.transform='scale(1)'">
+                    <button type="button" onclick="togglePassword(this)" 
+                            style="position:absolute; right:10px; top:37px; border:none; background:none; font-size:0.9em; color:#0d47a1; cursor:pointer;">
+                        Show
+                    </button>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3 position-relative">
+                    <label for="confirm_password" class="form-label" style="font-weight:500;">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                           style="border-radius:10px; padding:10px; transition: box-shadow 0.3s, transform 0.2s;"
+                           onfocus="this.style.boxShadow='0 0 8px rgba(13,71,161,0.3)'; this.style.transform='scale(1.01)';"
+                           onblur="this.style.boxShadow=''; this.style.transform='scale(1)'">
+                    <button type="button" onclick="toggleConfirmPassword(this)" 
+                            style="position:absolute; right:10px; top:37px; border:none; background:none; font-size:0.9em; color:#0d47a1; cursor:pointer;">
+                        Show
+                    </button>
+                </div>
+
+                <!-- Register Button -->
+                <div class="d-grid gap-2 mb-3">
+                    <button type="submit" class="btn btn-primary" 
+                            style="border-radius:10px; padding:10px; font-weight:500; transition: background 0.3s, transform 0.2s;"
+                            onmouseover="this.style.background='#1565c0'; this.style.transform='scale(1.02)';"
+                            onmouseout="this.style.background=''; this.style.transform='scale(1)'">
+                        Register
+                    </button>
+                </div>
+            </form>
+
+            <!-- Back to Login Link -->
+            <p class="text-center mt-3" style="font-size:0.9em;">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" style="color:#0d47a1; font-weight:500; text-decoration:none;"
+                   onmouseover="this.style.textDecoration='underline';" 
+                   onmouseout="this.style.textDecoration='none';">
+                    Login here
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Toggle Password Scripts -->
+    <script>
+        function togglePassword(button) {
+            const password = document.getElementById("password");
+            if (password.type === "password") {
+                password.type = "text";
+                button.innerText = "Hide";
+            } else {
+                password.type = "password";
+                button.innerText = "Show";
+            }
+        }
+
+        function toggleConfirmPassword(button) {
+            const password = document.getElementById("confirm_password");
+            if (password.type === "password") {
+                password.type = "text";
+                button.innerText = "Hide";
+            } else {
+                password.type = "password";
+                button.innerText = "Show";
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
