@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📑 Submissions</h2>
+    <table class="w-full text-left">
+        <thead>
+            <tr class="border-b bg-blue-100 dark:bg-gray-700">
+                <th class="p-2">Event</th>
+                <th class="p-2">Submission ID</th>
+                <th class="p-2">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in submissions %}
+            <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
+                <td class="p-2">{{ sub.event_name }}</td>
+                <td class="p-2">{{ sub.submission_id }}</td>
+                <td class="p-2">{{ sub.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
