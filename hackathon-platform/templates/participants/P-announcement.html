@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📢 Announcements</h2>
+    <ul>
+        {% for a in announcements %}
+        <li class="border-b p-2 hover:bg-blue-50 dark:hover:bg-gray-700">
+            {{ a.title }} - {{ a.content }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
