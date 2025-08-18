@@ -1,0 +1,143 @@
+{% extends "Pbase.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+
+
+<!-- Stats Cards -->
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
+
+
+  <!-- Events Card -->
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+
+    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📅 Events</h2>
+
+    <p class="text-3xl font-bold mt-2">{{ events_count }}</p>
+
+  </div>
+
+
+
+  <!-- Teams Card -->
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+
+    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">👥 Teams</h2>
+
+    <p class="text-3xl font-bold mt-2">{{ teams_count }}</p>
+
+  </div>
+
+
+
+  <!-- Submissions Card -->
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+
+    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📑 Submissions</h2>
+
+    <p class="text-3xl font-bold mt-2">{{ submissions_count }}</p>
+
+  </div>
+
+
+
+  <!-- Announcements Card -->
+
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+
+    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📢 Announcements</h2>
+
+    <p class="text-3xl font-bold mt-2">{{ announcements_count }}</p>
+
+  </div>
+
+</div>
+
+
+
+<!-- Activity Overview -->
+
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-6">
+
+  <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">Activity Overview</h2>
+
+
+
+  <div class="w-full bg-blue-100 dark:bg-gray-700 rounded-full h-4">
+
+    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ event.progress_percentage }}%"></div>
+
+  </div>
+
+
+
+  <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
+
+    <span>Progress</span>
+
+    <span>{{ event.progress_percentage }}%</span>
+
+  </div>
+
+</div>
+
+
+
+<!-- Recent Events -->
+
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+
+  <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">📅 Recent Events</h2>
+
+  <table class="w-full text-left border-collapse">
+
+    <thead>
+
+      <tr class="border-b bg-blue-100 dark:bg-gray-700">
+
+        <th class="p-3">Name</th>
+
+        <th class="p-3">Theme</th>
+
+        <th class="p-3">Start Date</th>
+
+        <th class="p-3">End Date</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      {% for e in recent_events %}
+
+      <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
+
+        <td class="p-3">{{ e.name }}</td>
+
+        <td class="p-3">{{ e.theme }}</td>
+
+        <td class="p-3">{{ e.start_date }}</td>
+
+        <td class="p-3">{{ e.end_date }}</td>
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+
+
+{% endblock %}

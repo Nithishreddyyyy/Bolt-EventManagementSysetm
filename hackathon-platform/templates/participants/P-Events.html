@@ -1,0 +1,26 @@
+{% extends "./P-base.html" %}
+{% block content %}
+<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📅 Events</h2>
+    <table class="w-full text-left">
+        <thead>
+            <tr class="border-b bg-blue-100 dark:bg-gray-700">
+                <th class="p-2">Name</th>
+                <th class="p-2">Theme</th>
+                <th class="p-2">Start Date</th>
+                <th class="p-2">End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
+                <td class="p-2">{{ event.name }}</td>
+                <td class="p-2">{{ event.theme }}</td>
+                <td class="p-2">{{ event.start_date }}</td>
+                <td class="p-2">{{ event.end_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
