@@ -1,144 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Participant Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
+    <meta charset="UTF-8">
+    <title>Participant Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
 </head>
-<body class="bg-gray-100 flex" x-data="{ sidebarOpen: false }">
+<body class="bg-gray-100 dark:bg-gray-900 flex text-gray-900 dark:text-gray-100">
 
-  <!-- Sidebar -->
-  <aside 
-    class="fixed top-0 left-0 w-64 bg-blue-700 text-white h-screen p-4 transform transition-transform duration-300 z-40"
-    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold">Hackathon</h2>
-      <button @click="sidebarOpen = false" class="text-white hover:text-blue-200 focus:outline-none">
-        ✕
-      </button>
-    </div>
-    <nav>
-      <ul class="space-y-4">
-        <li><a href="/dashboard" class="block hover:text-blue-200">Dashboard</a></li>
-        <li><a href="/events" class="block hover:text-blue-200">Events</a></li>
-        <li><a href="/teams" class="block hover:text-blue-200">Teams</a></li>
-        <li><a href="/submissions" class="block hover:text-blue-200">Submissions</a></li>
-        <li><a href="/announcements" class="block hover:text-blue-200">Announcements</a></li>
-      </ul>
-    </nav>
-  </aside>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 w-64 bg-blue-700 dark:bg-blue-900 text-white h-screen p-4 transform transition-transform duration-300">
+        <h2 class="text-2xl font-bold mb-6">Hackathon</h2>
+        <nav>
+            <ul class="space-y-4">
+                <li><a href="/dashboard" class="block hover:text-blue-200">🏠 Dashboard</a></li>
+                <li><a href="/events" class="block hover:text-blue-200">📅 Events</a></li>
+                <li><a href="/teams" class="block hover:text-blue-200">👥 Teams</a></li>
+                <li><a href="/submissions" class="block hover:text-blue-200">📑 Submissions</a></li>
+                <li><a href="/announcements" class="block hover:text-blue-200">📢 Announcements</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-  <!-- Overlay -->
-  <div 
-    class="fixed inset-0 bg-black bg-opacity-50 z-30"
-    x-show="sidebarOpen"
-    @click="sidebarOpen = false"
-    x-transition.opacity>
-  </div>
+    <!-- Main -->
+    <main class="flex-1 p-6 ml-64 transition-all duration-300">
+        <!-- Top bar -->
+        <header class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-4">
+                <!-- Hamburger button -->
+                <button id="toggleSidebar" class="text-blue-700 dark:text-blue-300 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-bold text-blue-800 dark:text-blue-300">Dashboard</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <input type="text" placeholder="Search..."
+                       class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400">
+                
+                <!-- Dark/Light mode toggle -->
+                <button id="toggleDark" class="p-2 rounded focus:outline-none">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414 1.414M18.364 18.364l-1.414-1.414M6.05 6.05L4.636 4.636" />
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 0111.21 3 7 7 0 0012 21a9 9 0 009-8.21z" />
+                    </svg>
+                </button>
 
-  <!-- Main -->
-  <main class="flex-1 p-6 w-full">
-    <!-- Top bar -->
-    <header class="flex justify-between items-center mb-6">
-      <div class="flex items-center space-x-3">
-        <!-- Hamburger Button (always visible) -->
-        <button 
-          @click="sidebarOpen = !sidebarOpen" 
-          class="text-blue-800 focus:outline-none text-2xl">
-          ☰
-        </button>
-        <h1 class="text-2xl font-bold text-blue-800">Dashboard</h1>
-      </div>
-      <div class="flex items-center space-x-4">
-        <input type="text" placeholder="Search..." class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <div class="font-semibold text-blue-700">Welcome, {{ session['user_name'] or 'Participant' }}</div>
-      </div>
-    </header>
+                <div class="font-semibold text-blue-700 dark:text-blue-300">
+                    Welcome, {{ session['user_name'] or 'Participant' }}
+                </div>
+            </div>
+        </header>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <div class="bg-white p-4 rounded shadow border-t-4 border-blue-500">
-        <h2 class="text-lg font-semibold text-blue-700">Manage Your Teams</h2>
-        <p class="text-2xl font-bold text-blue-900">{{ teams|length }}</p>
-      </div>
-      <div class="bg-white p-4 rounded shadow border-t-4 border-blue-500">
-        <h2 class="text-lg font-semibold text-blue-700">Your Submissions</h2>
-        <p class="text-2xl font-bold text-blue-900">{{ submissions|length }}</p>
-      </div>
-      <div class="bg-white p-4 rounded shadow border-t-4 border-blue-500">
-        <h2 class="text-lg font-semibold text-blue-700">Announcements</h2>
-        <p class="text-2xl font-bold text-blue-900">{{ announcements|length }}</p>
-      </div>
-    </div>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-3 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded shadow border-t-4 border-blue-500">
+                <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">👥 Teams</h2>
+                <p class="text-2xl font-bold text-blue-900 dark:text-blue-200">{{ teams|length }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded shadow border-t-4 border-blue-500">
+                <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📑 Submissions</h2>
+                <p class="text-2xl font-bold text-blue-900 dark:text-blue-200">{{ submissions|length }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded shadow border-t-4 border-blue-500">
+                <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📢 Announcements</h2>
+                <p class="text-2xl font-bold text-blue-900 dark:text-blue-200">{{ announcements|length }}</p>
+            </div>
+        </div>
 
-    <!-- Events Table -->
-    <div class="bg-white p-4 rounded shadow mb-6 overflow-x-auto">
-      <h2 class="text-lg font-semibold mb-2 text-blue-700">Your Events</h2>
-      <table class="w-full text-left">
-        <thead>
-          <tr class="border-b bg-blue-100">
-            <th class="p-2">Name</th>
-            <th class="p-2">Theme</th>
-            <th class="p-2">Start Date</th>
-            <th class="p-2">End Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for event in events %}
-          <tr class="border-b hover:bg-blue-50">
-            <td class="p-2">{{ event.name }}</td>
-            <td class="p-2">{{ event.theme }}</td>
-            <td class="p-2">{{ event.start_date }}</td>
-            <td class="p-2">{{ event.end_date }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        <!-- Activity Overview (Progress Bar) -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
+            <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">Activity Overview</h2>
+            
+            <div class="w-full bg-blue-100 dark:bg-gray-700 rounded-full h-4">
+                <div class="bg-blue-600 h-4 rounded-full" style="width: {{ event.progress_percentage }}%"></div>
+            </div>
+            
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300 mt-2">
+                <span>Progress</span>
+                <span>{{ event.progress_percentage }}%</span>
+            </div>
+        </div>
 
-    <!-- Teams Table -->
-    <div class="bg-white p-4 rounded shadow mb-6">
-      <h2 class="text-lg font-semibold mb-2 text-blue-700">Your Teams</h2>
-      <ul>
-        {% for team in teams %}
-        <li class="border-b p-2 hover:bg-blue-50">{{ team.team_name }} <span class="text-sm text-blue-500">({{ team.event_name }})</span></li>
-        {% endfor %}
-      </ul>
-    </div>
+        <!-- Events Table -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📅 Events</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b bg-blue-100 dark:bg-gray-700">
+                        <th class="p-2">Name</th>
+                        <th class="p-2">Theme</th>
+                        <th class="p-2">Start Date</th>
+                        <th class="p-2">End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
+                        <td class="p-2">{{ event.name }}</td>
+                        <td class="p-2">{{ event.theme }}</td>
+                        <td class="p-2">{{ event.start_date }}</td>
+                        <td class="p-2">{{ event.end_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Submissions Table -->
-    <div class="bg-white p-4 rounded shadow mb-6 overflow-x-auto">
-      <h2 class="text-lg font-semibold mb-2 text-blue-700">Your Submissions</h2>
-      <table class="w-full text-left">
-        <thead>
-          <tr class="border-b bg-blue-100">
-            <th class="p-2">Event</th>
-            <th class="p-2">Submission ID</th>
-            <th class="p-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sub in submissions %}
-          <tr class="border-b hover:bg-blue-50">
-            <td class="p-2">{{ sub.event_name }}</td>
-            <td class="p-2">{{ sub.submission_id }}</td>
-            <td class="p-2">{{ sub.status }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        <!-- Teams List -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">👥 Teams</h2>
+            <ul>
+                {% for team in teams %}
+                <li class="border-b p-2 hover:bg-blue-50 dark:hover:bg-gray-700">
+                    {{ team.team_name }}
+                    <span class="text-sm text-blue-500">({{ team.event_name }})</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <!-- Announcements -->
-    <div class="bg-white p-4 rounded shadow">
-      <h2 class="text-lg font-semibold mb-2 text-blue-700">Announcements</h2>
-      <ul>
-        {% for a in announcements %}
-        <li class="border-b p-2 hover:bg-blue-50">{{ a.title }} - {{ a.content }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </main>
+        <!-- Submissions Table -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📑 Submissions</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b bg-blue-100 dark:bg-gray-700">
+                        <th class="p-2">Event</th>
+                        <th class="p-2">Submission ID</th>
+                        <th class="p-2">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
+                        <td class="p-2">{{ sub.event_name }}</td>
+                        <td class="p-2">{{ sub.submission_id }}</td>
+                        <td class="p-2">{{ sub.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Announcements -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">📢 Announcements</h2>
+            <ul>
+                {% for a in announcements %}
+                <li class="border-b p-2 hover:bg-blue-50 dark:hover:bg-gray-700">{{ a.title }} - {{ a.content }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+
+    <!-- JS for sidebar & dark mode -->
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.getElementById("toggleSidebar");
+        const mainContent = document.querySelector("main");
+        const toggleDark = document.getElementById("toggleDark");
+        const html = document.documentElement;
+
+        // Sidebar toggle
+        toggleBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("-translate-x-full");
+            mainContent.classList.toggle("ml-64");
+        });
+
+        // Dark mode toggle
+        toggleDark.addEventListener("click", () => {
+            html.classList.toggle("dark");
+        });
+    </script>
 </body>
 </html>
