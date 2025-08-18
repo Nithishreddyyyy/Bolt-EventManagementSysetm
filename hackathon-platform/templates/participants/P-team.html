@@ -1,13 +1,20 @@
 {% extends "participants/P-base.html" %}
 {% block content %}
 <div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
-    <h2 class="text-lg font-semibold mb-2 text-blue-700 dark:text-blue-300">👥 Teams</h2>
-    <ul>
-        {% for team in teams %}
-        <li class="border-b p-2 hover:bg-blue-50 dark:hover:bg-gray-700">
-            {{ team.team_name }} <span class="text-sm text-blue-500">({{ team.event_name }})</span>
-        </li>
-        {% endfor %}
-    </ul>
+    <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">👥 My Teammates</h2>
+    
+    {% if teams %}
+        <div class="list-group">
+            {% for team in teams %}
+            <a href="{{ url_for('participant.team_details', team_id=team.team_id) }}" class="block border-b p-3 hover:bg-blue-50 dark:hover:bg-gray-700">
+                <h3 class="font-bold">{{ team.team_name }}</h3>
+                <p class="text-sm text-gray-500">Event: {{ team.event_name }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You are not a member of any team yet.</p>
+    {% endif %}
+
 </div>
 {% endblock %}
