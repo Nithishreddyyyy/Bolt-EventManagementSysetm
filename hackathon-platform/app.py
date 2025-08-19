@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify
+from datetime import datetime, timedelta
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from config import Config
@@ -57,6 +58,34 @@ def create_app():
     @app.shell_context_processor
     def shell_ctx():
         return {"db": db}
+
+    @app.cli.command("seed-events")
+    def seed_events():  # pragma: no cover utility
+        """Seed some sample events for quick local testing (idempotent)."""
+        from models.event import Event
+        from models.user import User
+        with app.app_context():
+            # Ensure at least one organizer user exists
+            organizer = User.query.filter_by(role="organizer").first()
+            if not organizer:
+                organizer = User(name="Demo Organizer", email="org@example.com", password="pass", role="organizer")
+                db.session.add(organizer)
+                db.session.commit()
+            existing = Event.query.filter_by(created_by=organizer.user_id).count()
+            if existing >= 3:
+                print("Seed events already present; skipping.")
+                return
+            base = datetime.utcnow()
+            samples = [
+                ("AI Innovation Challenge", base - timedelta(days=2), base + timedelta(days=3)),
+                ("FinTech Sprint", base + timedelta(days=5), base + timedelta(days=8)),
+                ("Open Source Marathon", base - timedelta(days=10), base - timedelta(days=5)),
+            ]
+            for name, start, end in samples:
+                e = Event(name=name, theme="General", rules="online allowed", start_date=start, end_date=end, prizes=None, created_by=organizer.user_id)
+                db.session.add(e)
+            db.session.commit()
+            print("Seeded sample events.")
 
     return app
 

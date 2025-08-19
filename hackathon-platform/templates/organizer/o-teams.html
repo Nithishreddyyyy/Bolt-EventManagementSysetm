@@ -29,10 +29,10 @@
     <aside class="col-lg-2 sidebar">
       <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
       <nav class="nav flex-column">
-       <a class="nav-link" href="o-index.html">Dashboard</a>
-        <a class="nav-link" href="o-events.html">Events</a>
-        <a class="nav-link active" href="o-teams.html">Teams</a>
-        <a class="nav-link" href="o-participants.html">Participants</a>
+  <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
+   <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
+   <a class="nav-link active" href="{{ url_for('organizer.teams_page') }}">Teams</a>
+   <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
         <a class="nav-link" href="o-revenue.html">Revenue</a>
         <a class="nav-link" href="o-judging.html">Judging</a>
         <a class="nav-link" href="o-settings.html">Settings</a>
@@ -59,44 +59,48 @@
       <!-- Teams table -->
       <div class="card p-3">
         <div class="muted mb-2">Registered Teams</div>
-        <table class="table table-hover">
+        <table class="table table-hover" id="teamsTable">
           <thead>
             <tr><th>#</th><th>Team Name</th><th>Members</th><th>Event</th><th>Status</th></tr>
           </thead>
-          <tbody id="teamTable"></tbody>
+          <tbody>
+            {% if teams and teams|length > 0 %}
+              {% for t in teams %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ t.team_name }}</td>
+                <td>{{ t.member_count }}</td>
+                <td>{{ t.event_name }}</td>
+                <td><span class="badge bg-{{ t.badge }}">{{ t.status }}</span></td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No teams yet.</td>
+              </tr>
+            {% endif %}
+          </tbody>
         </table>
       </div>
     </main>
   </div>
 </div>
-
 <script>
-  const teamData = {
-    online: [
-      { name:"CodeMasters", members:5, event:"AI Hack Online", status:"Active", badge:"success" },
-      { name:"BugHunters", members:4, event:"FinTech Challenge", status:"Pending", badge:"warning" }
-    ],
-    offline: [
-      { name:"BlockBuilders", members:6, event:"Blockchain Summit", status:"Active", badge:"success" },
-      { name:"HealthCoders", members:3, event:"HealthTech Delhi", status:"Pending", badge:"warning" }
-    ]
-  };
-  const tbody=document.getElementById("teamTable");
-  function renderTeams(mode){
-    tbody.innerHTML="";
-    teamData[mode].forEach((t,i)=>{
-      tbody.insertAdjacentHTML("beforeend",`
-        <tr>
-          <td>${i+1}</td><td>${t.name}</td><td>${t.members}</td><td>${t.event}</td>
-          <td><span class="badge bg-${t.badge}">${t.status}</span></td>
-        </tr>`);
-    });
+  // Theme toggle only (data already rendered server-side)
+  const themeToggle = document.getElementById('themeToggle');
+  const moonIcon = document.getElementById('moonIcon');
+  const sunIcon = document.getElementById('sunIcon');
+  function setTheme(theme){
+    document.body.setAttribute('data-theme', theme);
+    const dark = theme === 'dark';
+    moonIcon.style.display = dark ? 'none' : 'block';
+    sunIcon.style.display = dark ? 'block' : 'none';
   }
-  document.getElementById("modeToggle").addEventListener("change",function(){ renderTeams(this.checked?"online":"offline"); });
-  const moonIcon=document.getElementById("moonIcon"), sunIcon=document.getElementById("sunIcon");
-  function setTheme(theme){ document.body.setAttribute("data-theme",theme); const dark=(theme==="dark"); moonIcon.style.display=dark?"none":"block"; sunIcon.style.display=dark?"block":"none"; }
-  document.getElementById("themeToggle").addEventListener("click",()=>{ setTheme(document.body.getAttribute("data-theme")==="dark"?"light":"dark"); });
-  setTheme("light"); renderTeams("offline");
+  themeToggle.addEventListener('click', ()=>{
+    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light':'dark';
+    setTheme(next);
+  });
+  setTheme('light');
 </script>
 </body>
 </html>

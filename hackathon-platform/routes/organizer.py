@@ -3,7 +3,7 @@ from routes.utils import login_required, roles_required, get_current_user
 from models import db
 from models.event import Event
 from sqlalchemy import text
-from datetime import datetime
+from datetime import datetime, timedelta
 
 organizer_bp = Blueprint("organizer", __name__, url_prefix="/organizer")
 
@@ -101,24 +101,105 @@ def dashboard():
 @login_required
 @roles_required("organizer")
 def events_page():
-    """Render dynamic events list for the organizer."""
+    """Render dynamic events list for the organizer passing raw Event models."""
     user_id, _ = get_current_user()
-    now = datetime.utcnow()
     events = Event.query.filter_by(created_by=user_id).order_by(Event.start_date.desc()).all()
+    return render_template("organizer/o-events.html", events=events, now=datetime.utcnow(), timedelta=timedelta)
 
-    rows = []
-    for e in events:
-        # Determine status based on current time
-        if e.start_date > now:
-            status = "Upcoming"; badge = "warning"
-        elif e.end_date < now:
-            status = "Completed"; badge = "secondary"
-        else:
-            status = "Ongoing"; badge = "success"
-        rows.append({
-            "event": e,
-            "status": status,
-            "badge": badge,
-        })
 
-    return render_template("organizer/o-events.html", events=rows)
+@organizer_bp.route("/participants")
+@login_required
+@roles_required("organizer")
+def participants_page():
+    """Render participants across the organizer's events."""
+    user_id, _ = get_current_user()
+    participants = []
+    try:
+        sql = text(
+            """
+            SELECT DISTINCT u.user_id, u.name AS user_name, u.email, 
+                   t.team_id, t.team_name AS team_name,
+                   e.event_id, e.name AS event_name, e.start_date, e.end_date
+            FROM Teams t
+            JOIN TeamMembers tm ON tm.team_id = t.team_id
+            JOIN Users u ON u.user_id = tm.user_id
+            JOIN Events e ON e.event_id = t.event_id
+            WHERE e.created_by = :org_id
+            ORDER BY e.start_date DESC
+            """
+        )
+        rows = db.session.execute(sql, {"org_id": user_id}).mappings().all()
+        now = datetime.utcnow()
+        for r in rows:
+            # Derive status from event timing
+            start = r.get("start_date")
+            end = r.get("end_date")
+            if start and end:
+                if start > now:
+                    status = "Upcoming"; badge = "warning"
+                elif end < now:
+                    status = "Completed"; badge = "secondary"
+                else:
+                    status = "Active"; badge = "success"
+            else:
+                status = "Confirmed"; badge = "primary"
+            participants.append({
+                "user_name": r.get("user_name"),
+                "email": r.get("email"),
+                "team_name": r.get("team_name") or f"Team #{r.get('team_id')}",
+                "event_name": r.get("event_name"),
+                "status": status,
+                "badge": badge,
+            })
+    except Exception:
+        # If schema mismatch / tables absent, return empty list gracefully
+        participants = []
+
+    return render_template("organizer/o-participants.html", participants=participants)
+
+
+@organizer_bp.route("/teams")
+@login_required
+@roles_required("organizer")
+def teams_page():
+    """Render teams with member counts for organizer's events."""
+    user_id, _ = get_current_user()
+    teams = []
+    try:
+        sql = text(
+            """
+            SELECT t.team_id, t.team_name AS team_name, e.name AS event_name,
+                   e.start_date, e.end_date,
+                   COUNT(tm.user_id) AS member_count
+            FROM Teams t
+            JOIN Events e ON e.event_id = t.event_id
+            LEFT JOIN TeamMembers tm ON tm.team_id = t.team_id
+            WHERE e.created_by = :org_id
+            GROUP BY t.team_id, t.team_name, e.name, e.start_date, e.end_date
+            ORDER BY e.start_date DESC
+            """
+        )
+        rows = db.session.execute(sql, {"org_id": user_id}).mappings().all()
+        now = datetime.utcnow()
+        for r in rows:
+            start = r.get("start_date"); end = r.get("end_date")
+            if start and end:
+                if start > now:
+                    status = "Upcoming"; badge = "warning"
+                elif end < now:
+                    status = "Completed"; badge = "secondary"
+                else:
+                    status = "Active"; badge = "success"
+            else:
+                status = "Active"; badge = "primary"
+            teams.append({
+                "team_name": r.get("team_name") or f"Team #{r.get('team_id')}",
+                "event_name": r.get("event_name"),
+                "member_count": r.get("member_count", 0),
+                "status": status,
+                "badge": badge,
+            })
+    except Exception:
+        teams = []
+
+    return render_template("organizer/o-teams.html", teams=teams)

@@ -65,8 +65,8 @@
       <nav class="nav flex-column">
   <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
   <a class="nav-link active" href="{{ url_for('organizer.events_page') }}">Events</a>
-        <a class="nav-link" href="o-teams.html">Teams</a>
-        <a class="nav-link" href="o-participants.html">Participants</a>
+        <a class="nav-link" href="{{ url_for('organizer.teams_page') }}">Teams</a>
+        <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
         <a class="nav-link" href="o-revenue.html">Revenue</a>
         <a class="nav-link" href="o-judging.html">Judging</a>
         <a class="nav-link" href="o-settings.html">Settings</a>
@@ -99,7 +99,10 @@
 
       <!-- Event List -->
       <div class="card p-3">
-        <div class="muted mb-2">Your Events</div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="muted">Your Events</div>
+          <div class="small text-muted">Total: {{ events|length if events is defined else 0 }}</div>
+        </div>
         <table class="table table-hover" id="eventsTable">
           <thead>
             <tr>
@@ -111,23 +114,57 @@
             </tr>
           </thead>
           <tbody>
-            {% if events and events|length > 0 %}
-              {% for row in events %}
+            {% if events is defined and events|length > 0 %}
+              {% for e in events %}
+              {% set status = 'Ongoing' %}
+              {% set badge = 'success' %}
+              {% if e.start_date > now %}{% set status = 'Upcoming' %}{% set badge='warning' %}{% elif e.end_date < now %}{% set status = 'Completed' %}{% set badge='secondary' %}{% endif %}
               <tr>
                 <td>{{ loop.index }}</td>
-                <td>{{ row.event.name }}</td>
-                <td>{{ row.event.start_date.strftime('%Y-%m-%d') }} → {{ row.event.end_date.strftime('%Y-%m-%d') }}</td>
-                <td>{{ 'Online' if (row.event.rules and 'online' in row.event.rules|lower) else 'Offline' }}</td>
-                <td><span class="badge bg-{{ row.badge }}">{{ row.status }}</span></td>
+                <td>{{ e.name }}</td>
+                <td>{{ e.start_date.strftime('%Y-%m-%d') }} → {{ e.end_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ 'Online' if (e.rules and 'online' in e.rules|lower) else 'Offline' }}</td>
+                <td><span class="badge bg-{{ badge }}">{{ status }}</span></td>
               </tr>
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="5" class="text-center text-muted py-4">No events created yet.</td>
+                <td colspan="5" class="text-center text-muted py-4">
+                  No events created yet.<br>
+                  <span class="d-block mt-2 small">If you expected data:
+                    <ul class="list-unstyled mt-2 mb-0">
+                      <li>• Make sure you're logged in as an organizer who owns events (created_by matches your user_id).</li>
+                      <li>• Run <code>flask seed-events</code> to add sample events (development only).</li>
+                      <li>• Confirm server restarted after code changes.</li>
+                    </ul>
+                  </span>
+                </td>
               </tr>
             {% endif %}
           </tbody>
         </table>
+        {% if not (events is defined and events|length > 0) %}
+        <div class="mt-3">
+          <form class="row g-2" method="post" action="{{ url_for('events.create_event') }}" onsubmit="return confirm('Create a quick sample event?');">
+            <input type="hidden" name="created_by" value="{{ session.get('user_id') }}">
+            <div class="col-md-3">
+              <input required name="name" class="form-control form-control-sm" placeholder="Event name">
+            </div>
+            <div class="col-md-2">
+              <input required type="date" name="start_date" class="form-control form-control-sm" value="{{ now.strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="col-md-2">
+              <input required type="date" name="end_date" class="form-control form-control-sm" value="{{ (now + timedelta(days=2)).strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="col-md-3">
+              <input name="theme" class="form-control form-control-sm" placeholder="Theme">
+            </div>
+            <div class="col-md-2 d-grid">
+              <button class="btn btn-sm btn-primary">Quick Add</button>
+            </div>
+          </form>
+        </div>
+        {% endif %}
       </div>
     </main>
   </div>
