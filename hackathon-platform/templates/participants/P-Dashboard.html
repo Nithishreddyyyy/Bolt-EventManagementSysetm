@@ -72,7 +72,7 @@
 
   <div class="w-full bg-blue-100 dark:bg-gray-700 rounded-full h-4">
 
-    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ event.progress_percentage }}%"></div>
+    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ (event.progress_percentage|default(0))|int }}%;"></div>
 
   </div>
 
