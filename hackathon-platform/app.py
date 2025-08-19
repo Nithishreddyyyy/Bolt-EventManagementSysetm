@@ -21,7 +21,15 @@ def create_app():
 
     # Register blueprints
     from routes.auth import auth_bp
+    from routes.participant import participant_bp
+    from routes.events import events_bp
+    from routes.judge import judge_bp
+    from routes.organizer import organizer_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(participant_bp)
+    app.register_blueprint(events_bp, url_prefix="/api/events")
+    app.register_blueprint(judge_bp)
+    app.register_blueprint(organizer_bp)
 
     @app.route("/")
     def home():
@@ -35,4 +43,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True,port=5001)

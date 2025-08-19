@@ -19,14 +19,28 @@ def login_page():
         if user and user.password == password:   # use your actual password column name here
             print(f" Login successful for {user.email}")
             session["user_id"] = user.user_id   # store logged-in user
+            session["role"] = user.role
             flash("Login successful!", "success")
-            #return redirect(url_for("auth.login_page"))
+            # role-based redirect
+            if user.role == "participant":
+                return redirect(url_for("participant.dashboard"))
+            if user.role == "judge":
+                return redirect(url_for("judge.dashboard"))
+            if user.role == "organizer":
+                return redirect(url_for("organizer.dashboard"))
+            return redirect(url_for("auth.login_page"))
         else:
             print(f" Failed login attempt for {username_or_email}")
             flash("Invalid username or password!", "danger")
             return redirect(url_for("auth.login_page"))
 
     return render_template("login.html")
+
+@auth_bp.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("auth.login_page"))
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():

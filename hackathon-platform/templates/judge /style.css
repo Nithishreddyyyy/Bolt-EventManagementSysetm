@@ -1,0 +1,116 @@
+/* Theme Variables */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1e40af;
+  --bg-light: #f9fafb;
+  --bg-dark: #111827;
+  --text-light: #111;
+  --text-dark: #f9fafb;
+  --card-light: #fff;
+  --card-dark: #1f2937;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background 0.3s, color 0.3s;
+}
+
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Toggle Button */
+.icon-btn {
+  background: rgba(255, 255, 255, .15);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: .5rem;
+  line-height: 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, transform .2s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, .25);
+  transform: scale(1.05);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-around;
+  background: var(--card-light);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+body.dark nav {
+  background: var(--card-dark);
+  border-color: #374151;
+}
+
+nav a {
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+  transition: background .2s;
+}
+
+nav a:hover {
+  background: rgba(37, 99, 235, .1);
+}
+
+body.dark nav a:hover {
+  background: rgba(255, 255, 255, .1);
+}
+
+/* Main Layout */
+main {
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--card-light);
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .08);
+  transition: background 0.3s, color 0.3s;
+}
+
+body.dark .card {
+  background: var(--card-dark);
+}
+

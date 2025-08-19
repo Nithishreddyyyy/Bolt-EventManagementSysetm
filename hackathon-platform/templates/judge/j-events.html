@@ -1,0 +1,23 @@
+{% extends "judge/j-base.html" %}
+
+{% block title %}Judge Dashboard - Events{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Upcoming Events</h2>
+  {% if events and events|length > 0 %}
+    <ul>
+      {% for e in events %}
+        <li>
+          <strong>{{ e.name }}</strong>
+          {% if e.start_date %}
+            — {{ e.start_date.strftime('%Y-%m-%d %H:%M') }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No events available yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

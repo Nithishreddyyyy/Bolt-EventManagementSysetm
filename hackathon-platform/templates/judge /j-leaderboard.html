@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Judge Dashboard - Leaderboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>Judge Dashboard</h1>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" 
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71-.71M21 12h-1M4 12H3m16.95 7.95l-.71-.71M4.05 4.05l-.71.71M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="j-dashboard.html">Dashboard</a>
+    <a href="j-events.html">Events</a>
+    <a href="j-projects.html">Projects</a>
+    <a href="j-leaderboard.html">Leaderboard</a>
+    <a href="j-announcements.html">Announcements</a>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <div class="card">
+      <h2>Leaderboard</h2>
+      <p>🥇 Project A — 85 pts</p>
+      <p>🥈 Project B — 78 pts</p>
+      <p>🥉 Project C — 72 pts</p>
+      <p>4️⃣ Project D — 65 pts</p>
+    </div>
+  </main>
+
+  <script>
+    // Theme persistence
+    const toggleBtn = document.getElementById("themeToggle");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", 
+        document.body.classList.contains("dark") ? "dark" : "light");
+    });
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+  </script>
+</body>
+</html>
