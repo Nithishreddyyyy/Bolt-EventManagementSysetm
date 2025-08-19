@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organizer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --brand: #ff6b35;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f3f4f6;
+      --muted: #d1d5db;
+      --border: #1f2937;
+      --brand: #ff6b35;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    }
+    .sidebar {
+      height: 100vh;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+    }
+    .sidebar .nav-link { color: var(--text); margin: .25rem 0; font-weight: 600; }
+    .sidebar .nav-link.active { background: var(--brand); color: #fff; border-radius: 10px; }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      color: var(--text);
+    }
+    .form-check-input:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
+    }
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      width: 42px; height: 42px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--text); stroke-width: 1.8; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body data-theme="light">
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-lg-2 sidebar">
+      <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
+      <nav class="nav flex-column">
+        <a class="nav-link active" href="#">Dashboard</a>
+        <a class="nav-link" href="#">Events</a>
+        <a class="nav-link" href="#">Teams</a>
+        <a class="nav-link" href="#">Submissions</a>
+        <a class="nav-link" href="#">Judges</a>
+        <a class="nav-link" href="#">Sponsors</a>
+        <a class="nav-link" href="#">Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-lg-10 p-4">
+      <!-- Top bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Organizer Analytics</h2>
+        <div class="d-flex align-items-center gap-3">
+          <!-- Online/Offline toggle -->
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
+          </div>
+          <!-- Dark/Light toggle (SVG) -->
+          <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
+            <svg id="moonIcon" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg id="sunIcon" viewBox="0 0 24 24" style="display:none">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="muted small">Total Hackathons</div>
+            <h3 class="mt-1" id="totalHackathons">0</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="muted small">Registered Teams</div>
+            <h3 class="mt-1" id="teams">0</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="muted small">Submissions</div>
+            <h3 class="mt-1" id="submissions">0</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="muted small">Revenue</div>
+            <h3 class="mt-1" id="revenue">₹0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="muted">Participation Over Time</div>
+              <div class="small muted">Last 5 days</div>
+            </div>
+            <canvas id="lineChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <div class="muted">Online vs Offline</div>
+            <canvas id="pieChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Hackathons -->
+      <div class="card p-3">
+        <div class="muted mb-2">Trending Hackathons</div>
+        <table class="table table-hover" id="hackathonTable">
+          <thead>
+            <tr>
+              <th class="muted">#</th>
+              <th class="muted">Hackathon</th>
+              <th class="muted">Registrations</th>
+              <th class="muted">Status</th>
+            </tr>
+          </thead>
+          <tbody><!-- filled dynamically --></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const fmtINR = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
+  const fmtINRwithSymbol = (n) => `₹${fmtINR(n)}`;
+  function animateNumber(el, to, {prefix="", duration=800} = {}) {
+    const from = parseInt((el.textContent || "0").replace(/\D/g,'')) || 0;
+    const start = performance.now();
+    function frame(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const val = Math.round(from + (to - from) * p);
+      el.textContent = prefix ? `${prefix}${fmtINR(val)}` : fmtINR(val);
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const dataSets = {
+    online: {
+      stats: { hackathons: 8, teams: 220, submissions: 95, revenue: 320000 },
+      line: [120, 180, 240, 260, 320],
+      pie: [80, 20],
+      table: [
+        {name: "AI Innovation Challenge (Online)", reg: 1900, status: "Ongoing", badge: "success"},
+        {name: "FinTech Hack Online", reg: 1550, status: "Upcoming", badge: "warning"},
+        {name: "Open Source Sprint (Remote)", reg: 980, status: "Completed", badge: "secondary"}
+      ]
+    },
+    offline: {
+      stats: { hackathons: 4, teams: 130, submissions: 25, revenue: 130000 },
+      line: [60, 100, 120, 90, 110],
+      pie: [20, 80],
+      table: [
+        {name: "Blockchain Builders (Bengaluru)", reg: 520, status: "Ongoing",  badge: "success"},
+        {name: "HealthTech Hack (Delhi)", reg: 430, status: "Upcoming", badge: "warning"},
+        {name: "GreenTech Challenge (Mumbai)", reg: 370, status: "Completed", badge: "secondary"}
+      ]
+    }
+  };
+
+  const lineCtx = document.getElementById("lineChart").getContext("2d");
+  const pieCtx  = document.getElementById("pieChart").getContext("2d");
+
+  const chartTextColour = () => getComputedStyle(document.body).getPropertyValue('--text').trim() || '#1f2937';
+  const gridColour = () => getComputedStyle(document.body).getPropertyValue('--border').trim() || '#e5e7eb';
+
+  let lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels: ["D1","D2","D3","D4","D5"],
+      datasets: [{
+        label: "Participants",
+        data: dataSets.offline.line,
+        borderColor: getComputedStyle(document.body).getPropertyValue('--brand').trim() || '#ff6b35',
+        fill: false,
+        tension: 0.35,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      plugins: { legend: { labels: { color: chartTextColour() } } },
+      scales: {
+        x: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } },
+        y: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } }
+      }
+    }
+  });
+
+  let pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ["Online","Offline"],
+      datasets: [{
+        data: dataSets.offline.pie,
+        backgroundColor: [getComputedStyle(document.body).getPropertyValue('--brand').trim() || '#ff6b35', '#6366f1']
+      }]
+    },
+    options: { plugins: { legend: { labels: { color: chartTextColour() } } } }
+  });
+
+  function refreshChartTheme() {
+    const t = chartTextColour(), g = gridColour();
+    lineChart.options.scales.x.ticks.color = t;
+    lineChart.options.scales.y.ticks.color = t;
+    lineChart.options.scales.x.grid.color = g;
+    lineChart.options.scales.y.grid.color = g;
+    lineChart.options.plugins.legend.labels.color = t;
+    pieChart.options.plugins.legend.labels.color = t;
+    lineChart.update();
+    pieChart.update();
+  }
+
+  function updateStats(mode) {
+    const s = dataSets[mode].stats;
+    animateNumber(document.getElementById("totalHackathons"), s.hackathons);
+    animateNumber(document.getElementById("teams"), s.teams);
+    animateNumber(document.getElementById("submissions"), s.submissions);
+    animateNumber(document.getElementById("revenue"), s.revenue, {prefix:"₹"});
+  }
+
+  function updateTable(mode) {
+    const tbody = document.querySelector("#hackathonTable tbody");
+    tbody.innerHTML = "";
+    dataSets[mode].table.forEach((item, idx) => {
+      tbody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${idx+1}</td>
+          <td>${item.name}</td>
+          <td>${fmtINR(item.reg)}</td>
+          <td><span class="badge bg-${item.badge}">${item.status}</span></td>
+        </tr>
+      `);
+    });
+  }
+
+  function updateCharts(mode) {
+    lineChart.data.datasets[0].data = dataSets[mode].line;
+    pieChart.data.datasets[0].data = dataSets[mode].pie;
+    lineChart.update();
+    pieChart.update();
+  }
+
+  // Toggle handlers
+  document.getElementById("modeToggle").addEventListener("change", function() {
+    const mode = this.checked ? "online" : "offline";
+    updateStats(mode);
+    updateCharts(mode);
+    updateTable(mode);
+  });
+
+  const themeBtn = document.getElementById("themeToggle");
+  const moonIcon = document.getElementById("moonIcon");
+  const sunIcon  = document.getElementById("sunIcon");
+
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    const dark = theme === 'dark';
+    moonIcon.style.display = dark ? 'none' : 'block';
+    sunIcon.style.display  = dark ? 'block' : 'none';
+    refreshChartTheme();
+  }
+
+  themeBtn.addEventListener("click", () => {
+    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+    setTheme(next);
+  });
+
+  // Initial
+  setTheme('light');
+  updateStats('offline');
+  updateTable('offline');
+</script>
+</body>
+</html>
