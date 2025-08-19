@@ -67,3 +67,30 @@ CREATE TABLE JudgingScores (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (judge_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
+
+
+
+-- ==========================
+-- SPONSORS TABLE
+-- ==========================
+CREATE TABLE Sponsors (
+    sponsor_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    contact_person VARCHAR(100),
+    email VARCHAR(150),
+    phone VARCHAR(20),
+    website VARCHAR(200),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE EventSponsors (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    event_id INT UNSIGNED NOT NULL,
+    sponsor_id INT UNSIGNED NOT NULL,
+    sponsorship_type ENUM('cash', 'prizes', 'services', 'other') DEFAULT 'cash',
+    amount DECIMAL(12,2) DEFAULT 0.00,
+    FOREIGN KEY (event_id) REFERENCES Events(event_id) ON DELETE CASCADE,
+    FOREIGN KEY (sponsor_id) REFERENCES Sponsors(sponsor_id) ON DELETE CASCADE
+);
+
