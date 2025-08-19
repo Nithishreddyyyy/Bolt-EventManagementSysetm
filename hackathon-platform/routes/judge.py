@@ -14,4 +14,4 @@ def dashboard():
         "pending_reviews": 0,
         "completed_reviews": 0,
     }
-    return render_template("judge/dashboard.html", user_id=user_id, stats=stats)
+    return render_template("judge/j-dashboard.html", user_id=user_id, stats=stats)
