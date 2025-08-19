@@ -95,3 +95,30 @@ def dashboard():
     events = events_q.order_by(Event.start_date.desc()).limit(10).all()
     # Render the provided organizer dashboard template
     return render_template("organizer/o-index.html", user_id=user_id, stats=stats, events=events)
+
+
+@organizer_bp.route("/events")
+@login_required
+@roles_required("organizer")
+def events_page():
+    """Render dynamic events list for the organizer."""
+    user_id, _ = get_current_user()
+    now = datetime.utcnow()
+    events = Event.query.filter_by(created_by=user_id).order_by(Event.start_date.desc()).all()
+
+    rows = []
+    for e in events:
+        # Determine status based on current time
+        if e.start_date > now:
+            status = "Upcoming"; badge = "warning"
+        elif e.end_date < now:
+            status = "Completed"; badge = "secondary"
+        else:
+            status = "Ongoing"; badge = "success"
+        rows.append({
+            "event": e,
+            "status": status,
+            "badge": badge,
+        })
+
+    return render_template("organizer/o-events.html", events=rows)

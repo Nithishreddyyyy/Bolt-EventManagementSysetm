@@ -63,8 +63,8 @@
     <aside class="col-lg-2 sidebar">
       <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
       <nav class="nav flex-column">
-        <a class="nav-link" href="o-index.html">Dashboard</a>
-        <a class="nav-link active" href="o-events.html">Events</a>
+  <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
+  <a class="nav-link active" href="{{ url_for('organizer.events_page') }}">Events</a>
         <a class="nav-link" href="o-teams.html">Teams</a>
         <a class="nav-link" href="o-participants.html">Participants</a>
         <a class="nav-link" href="o-revenue.html">Revenue</a>
@@ -100,7 +100,7 @@
       <!-- Event List -->
       <div class="card p-3">
         <div class="muted mb-2">Your Events</div>
-        <table class="table table-hover">
+        <table class="table table-hover" id="eventsTable">
           <thead>
             <tr>
               <th>#</th>
@@ -110,68 +110,44 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="eventTable">
-            <!-- Populated dynamically -->
+          <tbody>
+            {% if events and events|length > 0 %}
+              {% for row in events %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ row.event.name }}</td>
+                <td>{{ row.event.start_date.strftime('%Y-%m-%d') }} → {{ row.event.end_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ 'Online' if (row.event.rules and 'online' in row.event.rules|lower) else 'Offline' }}</td>
+                <td><span class="badge bg-{{ row.badge }}">{{ row.status }}</span></td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">No events created yet.</td>
+              </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
     </main>
   </div>
 </div>
-
 <script>
-  const eventsData = {
-    online: [
-      { name: "AI Hack Online", date: "2025-09-05", mode: "Online", status: "Ongoing", badge: "success" },
-      { name: "FinTech Challenge", date: "2025-09-20", mode: "Online", status: "Upcoming", badge: "warning" }
-    ],
-    offline: [
-      { name: "Blockchain Summit", date: "2025-09-02", mode: "Offline", status: "Ongoing", badge: "success" },
-      { name: "HealthTech Delhi", date: "2025-09-12", mode: "Offline", status: "Upcoming", badge: "warning" }
-    ]
-  };
-
-  const tbody = document.getElementById("eventTable");
-  function renderEvents(mode) {
-    tbody.innerHTML = "";
-    eventsData[mode].forEach((ev, i) => {
-      tbody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td>${i+1}</td>
-          <td>${ev.name}</td>
-          <td>${ev.date}</td>
-          <td>${ev.mode}</td>
-          <td><span class="badge bg-${ev.badge}">${ev.status}</span></td>
-        </tr>
-      `);
-    });
-  }
-
-  // Online/Offline toggle
-  document.getElementById("modeToggle").addEventListener("change", function() {
-    renderEvents(this.checked ? "online" : "offline");
-  });
-
-  // Dark/Light toggle
-  const themeBtn = document.getElementById("themeToggle");
-  const moonIcon = document.getElementById("moonIcon");
-  const sunIcon  = document.getElementById("sunIcon");
-
-  function setTheme(theme) {
+  // Dark/Light toggle only
+  const themeBtn = document.getElementById('themeToggle');
+  const moonIcon = document.getElementById('moonIcon');
+  const sunIcon = document.getElementById('sunIcon');
+  function setTheme(theme){
     document.body.setAttribute('data-theme', theme);
     const dark = theme === 'dark';
     moonIcon.style.display = dark ? 'none' : 'block';
     sunIcon.style.display  = dark ? 'block' : 'none';
   }
-
-  themeBtn.addEventListener("click", () => {
-    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+  themeBtn.addEventListener('click', ()=>{
+    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light':'dark';
     setTheme(next);
   });
-
-  // Initial
   setTheme('light');
-  renderEvents('offline');
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from config import Config
@@ -38,6 +38,25 @@ def create_app():
     @app.route("/register")
     def register():
         return render_template("create_account.html")
+
+    # Health / readiness endpoint
+    @app.route("/health")
+    def health():
+        return jsonify(status="ok"), 200
+
+    # Example error handlers
+    @app.errorhandler(404)
+    def not_found(err):  # pragma: no cover simple handler
+        return render_template("login.html"), 404
+
+    @app.errorhandler(500)
+    def server_error(err):  # pragma: no cover simple handler
+        return jsonify(error="server_error"), 500
+
+    # Provide shell context for flask shell
+    @app.shell_context_processor
+    def shell_ctx():
+        return {"db": db}
 
     return app
 
