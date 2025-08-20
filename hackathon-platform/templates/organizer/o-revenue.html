@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Revenue - Organizer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --brand: #ff6b35;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f3f4f6;
+      --muted: #d1d5db;
+      --border: #1f2937;
+      --brand: #ff6b35;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    }
+    .sidebar {
+      height: 100vh;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+    }
+    .sidebar .nav-link { color: var(--text); margin: .25rem 0; font-weight: 600; }
+    .sidebar .nav-link.active { background: var(--brand); color: #fff; border-radius: 10px; }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      color: var(--text);
+    }
+    .form-check-input:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
+    }
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      width: 42px; height: 42px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--text); stroke-width: 1.8; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body data-theme="light">
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-lg-2 sidebar">
+      <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
+      <nav class="nav flex-column">
+        <a class="nav-link" href="o-index.html">Dashboard</a>
+        <a class="nav-link" href="o-events.html">Events</a>
+        <a class="nav-link" href="o-teams.html">Teams</a>
+        <a class="nav-link" href="o-participants.html">Participants</a>
+        <a class="nav-link active" href="o-revenue.html">Revenue</a>
+        <a class="nav-link" href="o-judging.html">Judging</a>
+        <a class="nav-link" href="o-settings.html">Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-lg-10 p-4">
+      <!-- Top bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Revenue Analytics</h2>
+        <div class="d-flex align-items-center gap-3">
+          <!-- Online/Offline toggle -->
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
+          </div>
+          <!-- Dark/Light toggle -->
+          <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
+            <svg id="moonIcon" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg id="sunIcon" viewBox="0 0 24 24" style="display:none">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Revenue Stats -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="muted small">Total Revenue</div>
+            <h3 class="mt-1" id="totalRevenue">₹0</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="muted small">Avg Revenue / Event</div>
+            <h3 class="mt-1" id="avgRevenue">₹0</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="muted small">Sponsors Contribution</div>
+            <h3 class="mt-1" id="sponsorRevenue">₹0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Charts -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <div class="muted mb-2">Revenue Over Time</div>
+            <canvas id="revenueLineChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card p-3">
+            <div class="muted mb-2">Revenue Breakdown</div>
+            <canvas id="revenuePieChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card p-3">
+        <div class="muted mb-2">Revenue by Hackathon</div>
+        <table class="table table-hover" id="revenueTable">
+          <thead>
+            <tr>
+              <th class="muted">#</th>
+              <th class="muted">Hackathon</th>
+              <th class="muted">Revenue</th>
+              <th class="muted">Sponsors</th>
+            </tr>
+          </thead>
+          <tbody><!-- dynamic --></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const fmtINR = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
+  const fmtINRwithSymbol = (n) => `₹${fmtINR(n)}`;
+  function animateNumber(el, to, {prefix="₹", duration=800} = {}) {
+    const from = parseInt((el.textContent || "0").replace(/\D/g,'')) || 0;
+    const start = performance.now();
+    function frame(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const val = Math.round(from + (to - from) * p);
+      el.textContent = `${prefix}${fmtINR(val)}`;
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const dataSets = {
+    online: {
+      stats: { total: 320000, avg: 40000, sponsor: 120000 },
+      line: [40000, 60000, 70000, 80000, 70000],
+      pie: [200000, 120000], // participants vs sponsors
+      table: [
+        {name: "AI Innovation Challenge", rev: 95000, sponsors: "₹40,000"},
+        {name: "FinTech Hack", rev: 78000, sponsors: "₹30,000"},
+        {name: "Open Source Sprint", rev: 45000, sponsors: "₹20,000"}
+      ]
+    },
+    offline: {
+      stats: { total: 130000, avg: 32500, sponsor: 50000 },
+      line: [20000, 30000, 25000, 30000, 25000],
+      pie: [80000, 50000],
+      table: [
+        {name: "Blockchain Builders", rev: 42000, sponsors: "₹15,000"},
+        {name: "HealthTech Hack", rev: 35000, sponsors: "₹20,000"},
+        {name: "GreenTech Challenge", rev: 28000, sponsors: "₹15,000"}
+      ]
+    }
+  };
+
+  const lineCtx = document.getElementById("revenueLineChart").getContext("2d");
+  const pieCtx  = document.getElementById("revenuePieChart").getContext("2d");
+
+  const chartTextColour = () => getComputedStyle(document.body).getPropertyValue('--text').trim() || '#1f2937';
+  const gridColour = () => getComputedStyle(document.body).getPropertyValue('--border').trim() || '#e5e7eb';
+
+  let revenueLineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: { labels: ["D1","D2","D3","D4","D5"], datasets: [{
+      label: "Revenue",
+      data: dataSets.offline.line,
+      borderColor: getComputedStyle(document.body).getPropertyValue('--brand').trim(),
+      fill: false, tension: 0.35, pointRadius: 3
+    }]},
+    options: {
+      plugins: { legend: { labels: { color: chartTextColour() } } },
+      scales: {
+        x: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } },
+        y: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } }
+      }
+    }
+  });
+
+  let revenuePieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ["Participants", "Sponsors"],
+      datasets: [{ data: dataSets.offline.pie,
+        backgroundColor: [getComputedStyle(document.body).getPropertyValue('--brand').trim(), '#6366f1']
+      }]
+    },
+    options: { plugins: { legend: { labels: { color: chartTextColour() } } } }
+  });
+
+  function refreshChartTheme() {
+    const t = chartTextColour(), g = gridColour();
+    revenueLineChart.options.scales.x.ticks.color = t;
+    revenueLineChart.options.scales.y.ticks.color = t;
+    revenueLineChart.options.scales.x.grid.color = g;
+    revenueLineChart.options.scales.y.grid.color = g;
+    revenueLineChart.options.plugins.legend.labels.color = t;
+    revenuePieChart.options.plugins.legend.labels.color = t;
+    revenueLineChart.update();
+    revenuePieChart.update();
+  }
+
+  function updateStats(mode) {
+    const s = dataSets[mode].stats;
+    animateNumber(document.getElementById("totalRevenue"), s.total);
+    animateNumber(document.getElementById("avgRevenue"), s.avg);
+    animateNumber(document.getElementById("sponsorRevenue"), s.sponsor);
+  }
+
+  function updateTable(mode) {
+    const tbody = document.querySelector("#revenueTable tbody");
+    tbody.innerHTML = "";
+    dataSets[mode].table.forEach((item, idx) => {
+      tbody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${idx+1}</td>
+          <td>${item.name}</td>
+          <td>₹${fmtINR(item.rev)}</td>
+          <td>${item.sponsors}</td>
+        </tr>
+      `);
+    });
+  }
+
+  function updateCharts(mode) {
+    revenueLineChart.data.datasets[0].data = dataSets[mode].line;
+    revenuePieChart.data.datasets[0].data = dataSets[mode].pie;
+    revenueLineChart.update();
+    revenuePieChart.update();
+  }
+
+  // Toggle Handlers
+  document.getElementById("modeToggle").addEventListener("change", function() {
+    const mode = this.checked ? "online" : "offline";
+    updateStats(mode);
+    updateCharts(mode);
+    updateTable(mode);
+  });
+
+  const themeBtn = document.getElementById("themeToggle");
+  const moonIcon = document.getElementById("moonIcon");
+  const sunIcon  = document.getElementById("sunIcon");
+
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    const dark = theme === 'dark';
+    moonIcon.style.display = dark ? 'none' : 'block';
+    sunIcon.style.display  = dark ? 'block' : 'none';
+    refreshChartTheme();
+  }
+
+  themeBtn.addEventListener("click", () => {
+    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+    setTheme(next);
+  });
+
+  // Initial Load
+  setTheme('light');
+  updateStats('offline');
+  updateTable('offline');
+</script>
+</body>
+</html>
