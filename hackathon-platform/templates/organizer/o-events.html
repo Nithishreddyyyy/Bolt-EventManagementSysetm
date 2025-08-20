@@ -1,145 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Events - Organizer Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #1a1b1e;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --brand: #ff6b35;
-    }
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --card: #111827;
-      --text: #f3f4f6;
-      --muted: #d1d5db;
-      --border: #1f2937;
-      --brand: #ff6b35;
-    }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
-    }
-    .sidebar {
-      height: 100vh;
-      background: var(--card);
-      border-right: 1px solid var(--border);
-      padding: 1rem;
-      position: sticky;
-      top: 0;
-    }
-    .sidebar .nav-link { color: var(--text); margin: .25rem 0; font-weight: 600; }
-    .sidebar .nav-link.active { background: var(--brand); color: #fff; border-radius: 10px; }
-    .card {
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      color: var(--text);
-    }
-    .icon-btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 999px;
-      width: 42px; height: 42px;
-      display: inline-flex; align-items: center; justify-content: center;
-      cursor: pointer;
-    }
-    .icon-btn svg { width: 22px; height: 22px; stroke: var(--text); stroke-width: 1.8; fill: none; }
-    .muted { color: var(--muted); }
-    /* Make the toggle orange when checked */
-.form-check-input:checked {
-  background-color: var(--brand) !important;
-  border-color: var(--brand) !important;
-}
-
-  </style>
-</head>
-<body data-theme="light">
-<div class="container-fluid">
-  <div class="row">
-    <!-- Sidebar -->
-    <aside class="col-lg-2 sidebar">
-      <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
-      <nav class="nav flex-column">
-  <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
-  <a class="nav-link active" href="{{ url_for('organizer.events_page') }}">Events</a>
-        <a class="nav-link" href="{{ url_for('organizer.teams_page') }}">Teams</a>
-        <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
-        <a class="nav-link" href="{{ url_for('organizer.revenue_page') }}">Revenue</a>
-        <a class="nav-link" href="{{ url_for('organizer.judging_page') }}">Judging</a>
-        <a class="nav-link" href="{{ url_for('organizer.settings_page') }}">Settings</a>
-      </nav>
-    </aside>
-
-    <!-- Main -->
-    <main class="col-lg-10 p-4">
-      <!-- Top bar -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="m-0">Manage Events</h2>
-        <div class="d-flex align-items-center gap-3">
-          <!-- Online/Offline toggle -->
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
-            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
-          </div>
-          <!-- Dark/Light toggle -->
-          <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
-            <svg id="moonIcon" viewBox="0 0 24 24">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-            <svg id="sunIcon" viewBox="0 0 24 24" style="display:none">
-              <circle cx="12" cy="12" r="4"></circle>
-              <path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Event List -->
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="muted">Your Events</div>
-          <div class="small muted">Total: {{ events|length if events is defined else 0 }}</div>
-
-        </div>
-        <table class="table table-hover" id="eventsTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Event Name</th>
-              <th>Date</th>
-              <th>Mode</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if events is defined and events|length > 0 %}
-              {% for e in events %}
-              {% set status = 'Ongoing' %}
-              {% set badge = 'success' %}
-              {% if e.start_date > now %}{% set status = 'Upcoming' %}{% set badge='warning' %}{% elif e.end_date < now %}{% set status = 'Completed' %}{% set badge='secondary' %}{% endif %}
-              <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ e.name }}</td>
-                <td>{{ e.start_date.strftime('%Y-%m-%d') }} → {{ e.end_date.strftime('%Y-%m-%d') }}</td>
-                <td>{{ 'Online' if (e.rules and 'online' in e.rules|lower) else 'Offline' }}</td>
-                <td><span class="badge bg-{{ badge }}">{{ status }}</span></td>
-              </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="5" class="text-center text-muted py-4">
-                  No events created yet.<br>
-                  <span class="d-block mt-2 small">If you expected data:
-                    <ul class="list-unstyled mt-2 mb-0">
+{% extends 'organizer/o-base.html' %}
+{% block title %}Events{% endblock %}
+{% block topbar %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="m-0">Manage Events</h2>
+  <div class="d-flex align-items-center gap-3">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+      <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
+    </div>
+    <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
+      <svg id="moonIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="sunIcon" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"/></svg>
+    </button>
+  </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="card p-3">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="muted">Your Events</div>
+    <div class="small muted">Total: {{ events|length if events is defined else 0 }}</div>
+  </div>
+  <table class="table table-hover" id="eventsTable">
+    <thead>
+      <tr><th>#</th><th>Event Name</th><th>Date</th><th>Mode</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    {% if events is defined and events|length > 0 %}
+      {% for e in events %}
+        {% set status = 'Ongoing' %}
+        {% set badge = 'success' %}
+        {% if e.start_date > now %}{% set status = 'Upcoming' %}{% set badge='warning' %}{% elif e.end_date < now %}{% set status = 'Completed' %}{% set badge='secondary' %}{% endif %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ e.name }}</td>
+          <td>{{ e.start_date.strftime('%Y-%m-%d') }} → {{ e.end_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ 'Online' if (e.rules and 'online' in e.rules|lower) else 'Offline' }}</td>
+          <td><span class="badge bg-{{ badge }}">{{ status }}</span></td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="5" class="text-center text-muted py-4">
+          No events created yet.<br>
+          <span class="d-block mt-2 small">If you expected data:
+            <ul class="list-unstyled mt-2 mb-0">
+              <li>• Ensure you're logged in as the creating organizer.</li>
+              <li>• Run <code>flask seed-events</code> for sample events.</li>
+              <li>• Restart server after migrations.</li>
+            </ul>
+          </span>
+        </td>
+      </tr>
+    {% endif %}
+    </tbody>
+  </table>
+  {% if not (events is defined and events|length > 0) %}
+  <div class="mt-3">
+    <form class="row g-2" method="post" action="{{ url_for('events.create_event') }}" onsubmit="return confirm('Create a quick sample event?');">
+      <input type="hidden" name="created_by" value="{{ session.get('user_id') }}">
+      <div class="col-md-3"><input required name="name" class="form-control form-control-sm" placeholder="Event name"></div>
+      <div class="col-md-2"><input required type="date" name="start_date" class="form-control form-control-sm" value="{{ now.strftime('%Y-%m-%d') }}"></div>
+      <div class="col-md-2"><input required type="date" name="end_date" class="form-control form-control-sm" value="{{ (now + timedelta(days=2)).strftime('%Y-%m-%d') }}"></div>
+      <div class="col-md-3"><input name="theme" class="form-control form-control-sm" placeholder="Theme"></div>
+      <div class="col-md-2 d-grid"><button class="btn btn-sm btn-primary">Quick Add</button></div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}{% endblock %}
                       <li>• Make sure you're logged in as an organizer who owns events (created_by matches your user_id).</li>
                       <li>• Run <code>flask seed-events</code> to add sample events (development only).</li>
                       <li>• Confirm server restarted after code changes.</li>

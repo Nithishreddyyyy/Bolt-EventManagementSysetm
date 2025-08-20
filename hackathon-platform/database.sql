@@ -94,3 +94,20 @@ CREATE TABLE EventSponsors (
     FOREIGN KEY (sponsor_id) REFERENCES Sponsors(sponsor_id) ON DELETE CASCADE
 );
 
+
+CREATE TABLE EventFinances (
+    finance_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    event_id INT UNSIGNED NOT NULL,
+    type ENUM('income', 'expense') NOT NULL,
+    source VARCHAR(150),
+    amount DECIMAL(12,2) NOT NULL,
+    recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES Events(event_id) ON DELETE CASCADE
+);
+
+
+
+ALTER TABLE Events
+ADD COLUMN budget DECIMAL(12,2) DEFAULT 0.00,
+ADD COLUMN revenue DECIMAL(12,2) DEFAULT 0.00,
+ADD COLUMN expenses DECIMAL(12,2) DEFAULT 0.00;
