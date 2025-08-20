@@ -176,7 +176,7 @@
   </div>
 </div>
 <script>
-  const themeBtn = document.getElementById("themeToggle");
+const themeBtn = document.getElementById("themeToggle");
 const moonIcon = document.getElementById("moonIcon");
 const sunIcon  = document.getElementById("sunIcon");
 const modeToggle = document.getElementById("modeToggle");
@@ -194,7 +194,9 @@ function setTheme(theme) {
 themeBtn.addEventListener("click", () => {
   const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   setTheme(current === 'dark' ? 'light' : 'dark');
+  refreshChartTheme();   // ✅ make charts update colors
 });
+
 
 // Apply saved theme on page load
 const savedTheme = localStorage.getItem('theme') || 'light';

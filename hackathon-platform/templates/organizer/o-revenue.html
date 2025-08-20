@@ -161,6 +161,51 @@
 </div>
 
 <script>
+      // Toggle Handlers
+ const themeBtn = document.getElementById("themeToggle");
+const moonIcon = document.getElementById("moonIcon");
+const sunIcon  = document.getElementById("sunIcon");
+const modeToggle = document.getElementById("modeToggle");
+
+// --- Theme functions ---
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme); // save theme
+  const dark = theme === 'dark';
+  moonIcon.style.display = dark ? 'none' : 'block';
+  sunIcon.style.display  = dark ? 'block' : 'none';
+}
+
+// Toggle dark/light
+themeBtn.addEventListener("click", () => {
+  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+  refreshChartTheme();   // ✅ make charts update colors
+});
+
+
+// Apply saved theme on page load
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+
+// --- Online/Offline functions ---
+function setMode(mode) {
+  modeToggle.checked = (mode === 'online'); // checked = online
+  localStorage.setItem('mode', mode);
+  // You can add any logic to load page-specific data here
+  // For example: fetchSettingsData(mode);
+}
+
+// Toggle online/offline
+modeToggle.addEventListener("change", function() {
+  const mode = this.checked ? 'online' : 'offline';
+  setMode(mode);
+  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+});
+
+// Apply saved mode on page load
+const savedMode = localStorage.getItem('mode') || 'offline';
+setMode(savedMode);
   const fmtINR = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
   const fmtINRwithSymbol = (n) => `₹${fmtINR(n)}`;
   function animateNumber(el, to, {prefix="₹", duration=800} = {}) {
@@ -273,49 +318,7 @@
     revenuePieChart.update();
   }
 
-  // Toggle Handlers
- const themeBtn = document.getElementById("themeToggle");
-const moonIcon = document.getElementById("moonIcon");
-const sunIcon  = document.getElementById("sunIcon");
-const modeToggle = document.getElementById("modeToggle");
 
-// --- Theme functions ---
-function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme); // save theme
-  const dark = theme === 'dark';
-  moonIcon.style.display = dark ? 'none' : 'block';
-  sunIcon.style.display  = dark ? 'block' : 'none';
-}
-
-// Toggle dark/light
-themeBtn.addEventListener("click", () => {
-  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  setTheme(current === 'dark' ? 'light' : 'dark');
-});
-
-// Apply saved theme on page load
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
-
-// --- Online/Offline functions ---
-function setMode(mode) {
-  modeToggle.checked = (mode === 'online'); // checked = online
-  localStorage.setItem('mode', mode);
-  // You can add any logic to load page-specific data here
-  // For example: fetchSettingsData(mode);
-}
-
-// Toggle online/offline
-modeToggle.addEventListener("change", function() {
-  const mode = this.checked ? 'online' : 'offline';
-  setMode(mode);
-  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
-});
-
-// Apply saved mode on page load
-const savedMode = localStorage.getItem('mode') || 'offline';
-setMode(savedMode);
 
 </script>
 </body>
