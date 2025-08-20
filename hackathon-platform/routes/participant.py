@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session, flash, redirect, url_for, request
 from types import SimpleNamespace
 from routes.utils import login_required, roles_required, get_current_user
 from models import db
@@ -21,6 +21,15 @@ def dashboard():
     announcements_count = 0
     recent_events = []
     user_id, role = get_current_user()
+    current_user_name = None
+    try:
+        from models.user import User
+        if user_id:
+            user_obj = User.query.get(user_id)
+            if user_obj:
+                current_user_name = user_obj.name
+    except Exception:
+        pass
 
     if Event is not None:
         recent_events = Event.query.order_by(Event.event_id.desc()).limit(5).all()
@@ -36,7 +45,8 @@ def dashboard():
         announcements_count=announcements_count,
         recent_events=recent_events,
         event=event_progress,
-        user_id=user_id,
+    user_id=user_id,
+    current_user_name=current_user_name,
     )
 
 @participant_bp.route("/events")
@@ -46,7 +56,8 @@ def events():
     events = []
     if Event is not None:
         events = Event.query.order_by(Event.start_date.asc()).all()
-    return render_template("participants/P-Events.html", events=events)
+    current_user_name = session.get('user_name')
+    return render_template("participants/P-Events.html", events=events, current_user_name=current_user_name)
 
 @participant_bp.route("/teams")
 @login_required
@@ -93,21 +104,24 @@ def teams():
         user_teams = []
 
     teams = user_teams # Use the new structure
-    return render_template("participants/P-team.html", teams=teams, user_id=user_id)
+    current_user_name = session.get('user_name')
+    return render_template("participants/P-team.html", teams=teams, user_id=user_id, current_user_name=current_user_name)
 
 @participant_bp.route("/submissions")
 @login_required
 @roles_required("participant")
 def submissions():
     submissions = []
-    return render_template("participants/P-Submissions.html", submissions=submissions)
+    current_user_name = session.get('user_name')
+    return render_template("participants/P-Submissions.html", submissions=submissions, current_user_name=current_user_name)
 
 @participant_bp.route("/announcements")
 @login_required
 @roles_required("participant")
 def announcements():
     announcements = []
-    return render_template("participants/P-announcement.html", announcements=announcements)
+    current_user_name = session.get('user_name')
+    return render_template("participants/P-announcement.html", announcements=announcements, current_user_name=current_user_name)
 
 
 @participant_bp.route("/team/<int:team_id>")
@@ -154,4 +168,5 @@ def team_details(team_id):
         print(f"Error fetching team details: {e}")
         team_info = None
 
-    return render_template("participants/P-team-details.html", team=team_info)
+    current_user_name = session.get('user_name')
+    return render_template("participants/P-team-details.html", team=team_info, current_user_name=current_user_name)

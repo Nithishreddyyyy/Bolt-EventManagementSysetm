@@ -1,143 +1,50 @@
-{% extends "participants/P-base.html" %}
-
+{% extends 'participants/P-base.html' %}
 {% block title %}Dashboard{% endblock %}
-
+{% block topbar %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="m-0">Hi, {{ current_user_name or 'Participant' }} 👋</h2>
+  <div class="d-flex align-items-center gap-3">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+      <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
+    </div>
+    <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
+      <svg id="moonIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="sunIcon" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"/></svg>
+    </button>
+  </div>
+</div>
+{% endblock %}
 {% block content %}
-
-
-
-<!-- Stats Cards -->
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
-
-
-  <!-- Events Card -->
-
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-
-    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📅 Events</h2>
-
-    <p class="text-3xl font-bold mt-2">{{ events_count }}</p>
-
-  </div>
-
-
-
-  <!-- Teams Card -->
-
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-
-    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">👥 Teams</h2>
-
-    <p class="text-3xl font-bold mt-2">{{ teams_count }}</p>
-
-  </div>
-
-
-
-  <!-- Submissions Card -->
-
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-
-    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📑 Submissions</h2>
-
-    <p class="text-3xl font-bold mt-2">{{ submissions_count }}</p>
-
-  </div>
-
-
-
-  <!-- Announcements Card -->
-
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-
-    <h2 class="text-lg font-semibold text-blue-700 dark:text-blue-300">📢 Announcements</h2>
-
-    <p class="text-3xl font-bold mt-2">{{ announcements_count }}</p>
-
-  </div>
-
+<div class="card p-3 mb-4">
+  <h5 class="mb-3">My Projects</h5>
+  <ul class="list-group list-group-flush" id="projectList"></ul>
 </div>
-
-
-
-<!-- Activity Overview -->
-
-<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-6">
-
-  <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">Activity Overview</h2>
-
-
-
-  <div class="w-full bg-blue-100 dark:bg-gray-700 rounded-full h-4">
-
-    <div class="bg-blue-600 h-4 rounded-full" style="width: {{ (event.progress_percentage|default(0))|int }}%;"></div>
-
-  </div>
-
-
-
-  <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-2">
-
-    <span>Progress</span>
-
-    <span>{{ event.progress_percentage }}%</span>
-
-  </div>
-
+<div class="card p-3 mb-4">
+  <h5 class="mb-3">Overall Progress</h5>
+  <div class="progress"><div id="progressBar" class="progress-bar" role="progressbar" style="width:0%">0%</div></div>
 </div>
-
-
-
-<!-- Recent Events -->
-
-<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-
-  <h2 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">📅 Recent Events</h2>
-
-  <table class="w-full text-left border-collapse">
-
-    <thead>
-
-      <tr class="border-b bg-blue-100 dark:bg-gray-700">
-
-        <th class="p-3">Name</th>
-
-        <th class="p-3">Theme</th>
-
-        <th class="p-3">Start Date</th>
-
-        <th class="p-3">End Date</th>
-
-      </tr>
-
-    </thead>
-
-    <tbody>
-
-      {% for e in recent_events %}
-
-      <tr class="border-b hover:bg-blue-50 dark:hover:bg-gray-700">
-
-        <td class="p-3">{{ e.name }}</td>
-
-        <td class="p-3">{{ e.theme }}</td>
-
-        <td class="p-3">{{ e.start_date }}</td>
-
-        <td class="p-3">{{ e.end_date }}</td>
-
-      </tr>
-
-      {% endfor %}
-
-    </tbody>
-
-  </table>
-
+<div class="card p-3 mb-4">
+  <h5 class="mb-3">Recent Activities</h5>
+  <ul class="list-group list-group-flush" id="activityList"></ul>
 </div>
-
-
-
+<div class="card p-3">
+  <h5 class="mb-3">Project Timeline</h5>
+  <ul class="list-group" id="timelineList"></ul>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const dataSets={
+    online:{projects:["AI Chatbot","Blockchain DApp","Health Monitor"],progress:80,activities:["Pushed code to GitHub","Joined 'AI Hackathon'","Submitted draft for Blockchain DApp"],timeline:[{project:"AI Chatbot",stage:"Prototype Completed"},{project:"Blockchain DApp",stage:"Design Phase"},{project:"Health Monitor",stage:"Ideation"}]},
+    offline:{projects:["FinTech Dashboard","Green Energy App"],progress:45,activities:["Participated in Ideation round","Worked on FinTech backend","Presented Green Energy proposal"],timeline:[{project:"FinTech Dashboard",stage:"Development"},{project:"Green Energy App",stage:"Prototype Phase"}]}
+  };
+  function updateDashboard(mode){
+    const ds=dataSets[mode];if(!ds) return;const projectList=document.getElementById('projectList');projectList.innerHTML='';ds.projects.forEach(p=>projectList.insertAdjacentHTML('beforeend',`<li class="list-group-item">${p}</li>`));
+    const bar=document.getElementById('progressBar');bar.style.width=ds.progress+"%";bar.textContent=ds.progress+"%";
+    const activityList=document.getElementById('activityList');activityList.innerHTML='';ds.activities.forEach(a=>activityList.insertAdjacentHTML('beforeend',`<li class="list-group-item">${a}</li>`));
+    const timelineList=document.getElementById('timelineList');timelineList.innerHTML='';ds.timeline.forEach(t=>timelineList.insertAdjacentHTML('beforeend',`<li class="list-group-item"><b>${t.project}</b> - ${t.stage}</li>`));
+  }
+  document.addEventListener('DOMContentLoaded',()=>{const mode=localStorage.getItem('mode')||'offline';updateDashboard(mode);});
+</script>
 {% endblock %}

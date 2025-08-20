@@ -1,27 +1,28 @@
-{% extends "participants/P-base.html" %}
+{% extends 'participants/P-base.html' %}
+{% block title %}Team Details{% endblock %}
+{% block topbar %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Team Details</h2>
+    <a href="{{ url_for('participant.teams') }}" class="btn btn-outline-secondary btn-sm">&larr; Back</a>
+</div>
+{% endblock %}
 {% block content %}
-<div class="bg-white dark:bg-gray-800 p-4 rounded shadow">
-    <a href="{{ url_for('participant.teams') }}" class="text-blue-500 hover:underline mb-4 inline-block">&larr; Back to Teammates</a>
-
+<div class="card p-3">
     {% if team %}
-        <h2 class="text-xl font-bold mb-1">{{ team.team_name }}</h2>
-        <p class="text-sm text-gray-600">Event: {{ team.event_name }}</p>
-        <p class="text-sm text-gray-600 mb-4">Leader: {{ team.leader_name }}</p>
-
-        <h3 class="font-semibold mt-4">Team Members</h3>
-        <ul class="list-disc list-inside mt-2">
+        <h4 class="mb-1">{{ team.team_name }}</h4>
+        <p class="mb-1 small text-muted">Event: {{ team.event_name }}</p>
+        <p class="mb-3 small text-muted">Leader: {{ team.leader_name }}</p>
+        <h6>Members</h6>
+        <ul class="list-group mb-0">
             {% for member in team.members %}
-            <li>
-                {{ member.name }}
-                <span class="text-xs px-2 py-1 rounded-full 
-                    {% if member.role == 'leader' %} bg-green-200 text-green-800 {% else %} bg-gray-200 text-gray-700 {% endif %}">
-                    {{ member.role }}
-                </span>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ member.name }}</span>
+                <span class="badge bg-{% if member.role=='leader' %}success{% else %}secondary{% endif %}">{{ member.role }}</span>
             </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p class="text-red-500">Team details could not be found or you do not have permission to view this team.</p>
+        <div class="alert alert-danger m-0">Team not found or access denied.</div>
     {% endif %}
 </div>
 {% endblock %}
