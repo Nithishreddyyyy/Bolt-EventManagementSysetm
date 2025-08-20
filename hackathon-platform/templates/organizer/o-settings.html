@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organizer Settings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --brand: #ff6b35;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f3f4f6;
+      --muted: #d1d5db;
+      --border: #1f2937;
+      --brand: #ff6b35;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    }
+    .sidebar {
+      height: 100vh;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+    }
+    .sidebar .nav-link { color: var(--text); margin: .25rem 0; font-weight: 600; }
+    .sidebar .nav-link.active { background: var(--brand); color: #fff; border-radius: 10px; }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      color: var(--text);
+    }
+    .form-check-input:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
+    }
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      width: 42px; height: 42px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--text); stroke-width: 1.8; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body data-theme="light">
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-lg-2 sidebar">
+      <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
+      <nav class="nav flex-column">
+        <a class="nav-link" href="o-index.html">Dashboard</a>
+        <a class="nav-link" href="o-events.html">Events</a>
+        <a class="nav-link" href="o-teams.html">Teams</a>
+        <a class="nav-link" href="o-participants.html">Participants</a>
+        <a class="nav-link" href="o-revenue.html">Revenue</a>
+        <a class="nav-link" href="o-judging.html">Judging</a>
+        <a class="nav-link active" href="o-settings.html">Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-lg-10 p-4">
+      <!-- Top bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Settings</h2>
+        <div class="d-flex align-items-center gap-3">
+          <!-- Online/Offline toggle -->
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
+            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
+          </div>
+          <!-- Dark/Light toggle -->
+          <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
+            <svg id="moonIcon" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg id="sunIcon" viewBox="0 0 24 24" style="display:none">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M20 12h2M2 12H4M18.36 5.64l1.41-1.41M4.23 19.78l1.41-1.41M18.36 18.36l1.41 1.41M4.23 4.22l1.41 1.41"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Settings content -->
+      <div class="row g-3">
+
+        <!-- Account Management -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Account Management</h5>
+            <div class="form-group mt-3">
+              <label class="form-label">Organizer Name</label>
+              <input type="text" class="form-control" placeholder="Your name">
+            </div>
+            <div class="form-group mt-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" placeholder="email@example.com">
+            </div>
+            <div class="form-group mt-3">
+              <label class="form-label">Change Password</label>
+              <input type="password" class="form-control" placeholder="New password">
+            </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="twoFA">
+              <label class="form-check-label" for="twoFA">Enable Two-Factor Authentication</label>
+            </div>
+            <button class="btn btn-danger mt-3">Delete Account</button>
+          </div>
+        </div>
+
+        <!-- Notification & Preferences -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Notifications & Preferences</h5>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="notifyEmail">
+              <label class="form-check-label" for="notifyEmail">Enable Email Notifications</label>
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="notifySMS">
+              <label class="form-check-label" for="notifySMS">Enable SMS / Push Notifications</label>
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="newsletter">
+              <label class="form-check-label" for="newsletter">Subscribe to Newsletter</label>
+            </div>
+            <div class="form-group mt-3">
+              <label class="form-label">Default Time Zone</label>
+              <select class="form-select">
+                <option>UTC +05:30 (India Standard Time)</option>
+                <option>UTC +00:00 (GMT)</option>
+                <option>UTC -05:00 (Eastern Time)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment & Billing -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Payment & Billing</h5>
+            <p>Subscription Plan: <strong>Pro</strong> <button class="btn btn-sm btn-outline-primary">Upgrade</button></p>
+            <div class="form-group mt-2">
+              <label class="form-label">Billing Address</label>
+              <input type="text" class="form-control" placeholder="Address">
+            </div>
+            <button class="btn btn-primary mt-3">View Invoices</button>
+          </div>
+        </div>
+
+        <!-- Security & Access -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Security & Access</h5>
+            <button class="btn btn-outline-secondary mb-2">View Login Activity</button>
+            <button class="btn btn-outline-secondary mb-2">Log Out Other Sessions</button>
+            <button class="btn btn-outline-secondary mb-2">Manage API Keys / Integrations</button>
+          </div>
+        </div>
+
+        <!-- Event Management Defaults -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Event Management Defaults</h5>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="autoApproval">
+              <label class="form-check-label" for="autoApproval">Auto-approve Team Registrations</label>
+            </div>
+            <div class="form-group mt-3">
+              <label class="form-label">Default Submission Deadline (days)</label>
+              <input type="number" class="form-control" value="7">
+            </div>
+            <button class="btn btn-outline-primary mt-3">Manage Templates</button>
+          </div>
+        </div>
+
+        <!-- Branding & Customization -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Branding & Customization</h5>
+            <div class="form-group mt-2">
+              <label class="form-label">Upload Logo</label>
+              <input type="file" class="form-control">
+            </div>
+            <div class="form-group mt-2">
+              <label class="form-label">Dashboard Color</label>
+              <input type="color" class="form-control form-control-color" value="#ff6b35">
+            </div>
+            <button class="btn btn-outline-primary mt-3">Edit Email Templates</button>
+          </div>
+        </div>
+
+        <!-- Help & Support -->
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Help & Support</h5>
+            <button class="btn btn-outline-secondary mb-2">FAQ / Documentation</button>
+            <button class="btn btn-outline-secondary mb-2">Contact Support</button>
+            <button class="btn btn-outline-secondary mb-2">Report a Bug / Feedback</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const themeBtn = document.getElementById("themeToggle");
+  const moonIcon = document.getElementById("moonIcon");
+  const sunIcon  = document.getElementById("sunIcon");
+
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    const dark = theme === 'dark';
+    moonIcon.style.display = dark ? 'none' : 'block';
+    sunIcon.style.display  = dark ? 'block' : 'none';
+  }
+
+  themeBtn.addEventListener("click", () => {
+    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+    setTheme(next);
+  });
+
+  document.getElementById("modeToggle").addEventListener("change", function() {
+    alert(this.checked ? "Switched to Online mode" : "Switched to Offline mode");
+    // Add your logic to fetch settings data if needed
+  });
+
+  setTheme('light');
+</script>
+</body>
+</html>
