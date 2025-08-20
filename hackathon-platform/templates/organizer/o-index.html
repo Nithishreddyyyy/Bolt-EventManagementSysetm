@@ -12,7 +12,7 @@
     :root {
       --bg: #f6f7fb;
       --card: #ffffff;
-      --text: #1f2937;
+      --text: #1d1f22;
       --muted: #6b7280;
       --border: #e5e7eb;
       --brand: #ff6b35;
@@ -62,6 +62,12 @@
     }
     .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--text); stroke-width: 1.8; }
     .muted { color: var(--muted); }
+    /* Make the toggle orange when checked */
+.form-check-input:checked {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+}
+
     /* Trending Hackathons Table Dark Mode */
     [data-theme="dark"] #hackathonTable,
     [data-theme="dark"] #hackathonTable thead,
@@ -99,9 +105,9 @@
   <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
         <a class="nav-link" href="{{ url_for ('organizer.teams_page') }}">Teams</a>
         <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
-        <a class="nav-link" href="o-revenue.html">Revenue</a>
-        <a class="nav-link" href="o-judging.html">Judging</a>
-        <a class="nav-link" href="o-settings.html">Settings</a>
+        <a class="nav-link" href="{{ url_for('organizer.revenue_page') }}">Revenue</a>
+        <a class="nav-link" href="{{ url_for('organizer.judging_page') }}">Judging</a>
+        <a class="nav-link" href="{{ url_for('organizer.settings_page') }}">Settings</a>
       </nav>
     </aside>
 
@@ -196,6 +202,48 @@
 </div>
 
 <script>
+const themeBtn = document.getElementById("themeToggle");
+const moonIcon = document.getElementById("moonIcon");
+const sunIcon  = document.getElementById("sunIcon");
+const modeToggle = document.getElementById("modeToggle");
+  // --- Theme functions ---
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme); // save theme
+  const dark = theme === 'dark';
+  moonIcon.style.display = dark ? 'none' : 'block';
+  sunIcon.style.display  = dark ? 'block' : 'none';
+}
+
+// Toggle dark/light
+themeBtn.addEventListener("click", () => {
+  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// Apply saved theme on page load
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+
+// --- Online/Offline functions ---
+function setMode(mode) {
+  modeToggle.checked = (mode === 'online'); // checked = online
+  localStorage.setItem('mode', mode);
+  // You can add any logic to load page-specific data here
+  // For example: fetchSettingsData(mode);
+}
+
+// Toggle online/offline
+modeToggle.addEventListener("change", function() {
+  const mode = this.checked ? 'online' : 'offline';
+  setMode(mode);
+  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+});
+
+// Apply saved mode on page load
+const savedMode = localStorage.getItem('mode') || 'offline';
+setMode(savedMode);
+
   // Parse server-provided stats JSON (from <script id="initial-stats" type="application/json">)
   (function(){
     try {
@@ -324,35 +372,8 @@
     pieChart.update();
   }
 
-  // Toggle handlers
-  document.getElementById("modeToggle").addEventListener("change", function() {
-    const mode = this.checked ? "online" : "offline";
-    // KPIs remain from server; only charts/table switch datasets
-    updateCharts(mode);
-    updateTable(mode);
-  });
 
-  const themeBtn = document.getElementById("themeToggle");
-  const moonIcon = document.getElementById("moonIcon");
-  const sunIcon  = document.getElementById("sunIcon");
 
-  function setTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    const dark = theme === 'dark';
-    moonIcon.style.display = dark ? 'none' : 'block';
-    sunIcon.style.display  = dark ? 'block' : 'none';
-    refreshChartTheme();
-  }
-
-  themeBtn.addEventListener("click", () => {
-    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
-    setTheme(next);
-  });
-
-  // Initial
-  setTheme('light');
-  renderServerStats();
-  updateTable('offline');
 </script>
 </body>
 </html>

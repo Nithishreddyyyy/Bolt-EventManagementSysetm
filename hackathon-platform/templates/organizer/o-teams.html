@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      --bg: #f6f7fb; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --border: #e5e7eb; --brand: #ff6b35;
+      --bg: #f6f7fb; --card: #ffffff; --text: #0d0d0e; --muted: #6b7280; --border: #e5e7eb; --brand: #ff6b35;
     }
     [data-theme="dark"] {
       --bg: #0f172a; --card: #111827; --text: #f3f4f6; --muted: #d1d5db; --border: #1f2937; --brand: #ff6b35;
@@ -20,6 +20,12 @@
     .icon-btn { border: 1px solid var(--border); background: var(--card); border-radius: 999px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .icon-btn svg { width: 22px; height: 22px; stroke: var(--text); stroke-width: 1.8; fill: none; }
     .muted { color: var(--muted); }
+    /* Make the toggle orange when checked */
+.form-check-input:checked {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+}
+
   </style>
 </head>
 <body data-theme="light">
@@ -29,13 +35,13 @@
     <aside class="col-lg-2 sidebar">
       <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
       <nav class="nav flex-column">
-  <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
-   <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
-   <a class="nav-link active" href="{{ url_for('organizer.teams_page') }}">Teams</a>
-   <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
-        <a class="nav-link" href="o-revenue.html">Revenue</a>
-        <a class="nav-link" href="o-judging.html">Judging</a>
-        <a class="nav-link" href="o-settings.html">Settings</a>
+        <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
+        <a class="nav-link active" href="{{ url_for('organizer.teams_page') }}">Teams</a>
+        <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
+        <a class="nav-link " href="{{ url_for('organizer.revenue_page') }}">Revenue</a>
+        <a class="nav-link" href="{{ url_for('organizer.judging_page') }}">Judging</a>
+        <a class="nav-link" href="{{ url_for('organizer.settings_page') }}">Settings</a>
       </nav>
     </aside>
 
@@ -86,21 +92,49 @@
   </div>
 </div>
 <script>
-  // Theme toggle only (data already rendered server-side)
-  const themeToggle = document.getElementById('themeToggle');
-  const moonIcon = document.getElementById('moonIcon');
-  const sunIcon = document.getElementById('sunIcon');
-  function setTheme(theme){
-    document.body.setAttribute('data-theme', theme);
-    const dark = theme === 'dark';
-    moonIcon.style.display = dark ? 'none' : 'block';
-    sunIcon.style.display = dark ? 'block' : 'none';
-  }
-  themeToggle.addEventListener('click', ()=>{
-    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light':'dark';
-    setTheme(next);
-  });
-  setTheme('light');
+  const themeBtn = document.getElementById("themeToggle");
+const moonIcon = document.getElementById("moonIcon");
+const sunIcon  = document.getElementById("sunIcon");
+const modeToggle = document.getElementById("modeToggle");
+
+// --- Theme functions ---
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme); // save theme
+  const dark = theme === 'dark';
+  moonIcon.style.display = dark ? 'none' : 'block';
+  sunIcon.style.display  = dark ? 'block' : 'none';
+}
+
+// Toggle dark/light
+themeBtn.addEventListener("click", () => {
+  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// Apply saved theme on page load
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+
+// --- Online/Offline functions ---
+function setMode(mode) {
+  modeToggle.checked = (mode === 'online'); // checked = online
+  localStorage.setItem('mode', mode);
+  // You can add any logic to load page-specific data here
+  // For example: fetchSettingsData(mode);
+}
+
+// Toggle online/offline
+modeToggle.addEventListener("change", function() {
+  const mode = this.checked ? 'online' : 'offline';
+  setMode(mode);
+  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+});
+
+// Apply saved mode on page load
+const savedMode = localStorage.getItem('mode') || 'offline';
+setMode(savedMode);
+
 </script>
 </body>
 </html>

@@ -20,6 +20,7 @@ def login_page():
             print(f" Login successful for {user.email}")
             session["user_id"] = user.user_id   # store logged-in user
             session["role"] = user.role
+            session["user_name"] = user.name
             flash("Login successful!", "success")
             # role-based redirect
             if user.role == "participant":
