@@ -275,34 +275,49 @@
   }
 
   // Toggle Handlers
-  document.getElementById("modeToggle").addEventListener("change", function() {
-    const mode = this.checked ? "online" : "offline";
-    updateStats(mode);
-    updateCharts(mode);
-    updateTable(mode);
-  });
-
   const themeBtn = document.getElementById("themeToggle");
-  const moonIcon = document.getElementById("moonIcon");
-  const sunIcon  = document.getElementById("sunIcon");
+const moonIcon = document.getElementById("moonIcon");
+const sunIcon  = document.getElementById("sunIcon");
+const modeToggle = document.getElementById("modeToggle");
 
-  function setTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    const dark = theme === 'dark';
-    moonIcon.style.display = dark ? 'none' : 'block';
-    sunIcon.style.display  = dark ? 'block' : 'none';
-    refreshChartTheme();
-  }
+// --- Theme functions ---
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme); // save theme
+  const dark = theme === 'dark';
+  moonIcon.style.display = dark ? 'none' : 'block';
+  sunIcon.style.display  = dark ? 'block' : 'none';
+}
 
-  themeBtn.addEventListener("click", () => {
-    const next = (document.body.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
-    setTheme(next);
-  });
+// Toggle dark/light
+themeBtn.addEventListener("click", () => {
+  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+});
 
-  // Initial Load
-  setTheme('light');
-  updateStats('offline');
-  updateTable('offline');
+// Apply saved theme on page load
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+
+// --- Online/Offline functions ---
+function setMode(mode) {
+  modeToggle.checked = (mode === 'online'); // checked = online
+  localStorage.setItem('mode', mode);
+  // You can add any logic to load page-specific data here
+  // For example: fetchSettingsData(mode);
+}
+
+// Toggle online/offline
+modeToggle.addEventListener("change", function() {
+  const mode = this.checked ? 'online' : 'offline';
+  setMode(mode);
+  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
+});
+
+// Apply saved mode on page load
+const savedMode = localStorage.getItem('mode') || 'offline';
+setMode(savedMode);
+
 </script>
 </body>
 </html>
