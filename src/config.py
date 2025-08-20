@@ -4,11 +4,9 @@ class Config:
     # Secret key for sessions
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret_key")
 
-    # Database URI (MySQL from Render/PlanetScale)
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL", 
-        "mysql+pymysql://root:test1234@localhost/hackdb"  # fallback for local dev
-    )
+    # Database URI (SQLite for local/dev)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'app.db')}"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
