@@ -269,6 +269,21 @@ modeToggle.addEventListener("change", function() {
 // Apply saved mode on page load
 const savedMode = localStorage.getItem('mode') || 'offline';
 setMode(savedMode);
+// --- Branding color picker ---
+const colorInput = document.querySelector('input[type="color"]');
+
+// Load saved dashboard color
+const savedColor = localStorage.getItem('dashboardColor') || '#ff6b35';
+colorInput.value = savedColor;
+document.documentElement.style.setProperty('--brand', savedColor);
+
+// Update color when changed
+colorInput.addEventListener('input', function () {
+  const color = this.value;
+  document.documentElement.style.setProperty('--brand', color);
+  localStorage.setItem('dashboardColor', color);
+});
+
 
 </script>
 </body>
