@@ -69,13 +69,13 @@
     <aside class="col-lg-2 sidebar">
       <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
       <nav class="nav flex-column">
-        <a class="nav-link" href="o-index.html">Dashboard</a>
-        <a class="nav-link" href="o-events.html">Events</a>
-        <a class="nav-link" href="o-teams.html">Teams</a>
-        <a class="nav-link" href="o-participants.html">Participants</a>
-        <a class="nav-link active" href="o-revenue.html">Revenue</a>
-        <a class="nav-link" href="o-judging.html">Judging</a>
-        <a class="nav-link" href="o-settings.html">Settings</a>
+        <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
+        <a class="nav-link" href="{{ url_for('organizer.teams_page') }}">Teams</a>
+        <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
+        <a class="nav-link active" href="{{ url_for('organizer.revenue_page') }}">Revenue</a>
+        <a class="nav-link" href="{{ url_for('organizer.judging_page') }}">Judging</a>
+        <a class="nav-link" href="{{ url_for('organizer.settings_page') }}">Settings</a>
       </nav>
     </aside>
 
@@ -85,12 +85,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="m-0">Revenue Analytics</h2>
         <div class="d-flex align-items-center gap-3">
-          <!-- Online/Offline toggle -->
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
-            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
-          </div>
-          <!-- Dark/Light toggle -->
           <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
             <svg id="moonIcon" viewBox="0 0 24 24">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -108,19 +102,19 @@
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Total Revenue</div>
-            <h3 class="mt-1" id="totalRevenue">₹0</h3>
+            <h3 class="mt-1" id="totalRevenue">₹{{ '%.0f'|format(stats.total_revenue) }}</h3>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Avg Revenue / Event</div>
-            <h3 class="mt-1" id="avgRevenue">₹0</h3>
+            <h3 class="mt-1" id="avgRevenue">₹{{ '%.0f'|format(stats.avg_revenue) }}</h3>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Sponsors Contribution</div>
-            <h3 class="mt-1" id="sponsorRevenue">₹0</h3>
+            <h3 class="mt-1" id="sponsorRevenue">₹{{ '%.0f'|format(stats.sponsor_total) }}</h3>
           </div>
         </div>
       </div>
@@ -153,7 +147,18 @@
               <th class="muted">Sponsors</th>
             </tr>
           </thead>
-          <tbody><!-- dynamic --></tbody>
+          <tbody>
+          {% for row in revenue_rows %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ row.event_name }}</td>
+              <td>₹{{ '%.0f'|format(row.sponsor_amount) }}</td>
+              <td>{{ '₹%.0f'|format(row.sponsor_amount) }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center text-muted">No revenue data yet.</td></tr>
+          {% endfor %}
+          </tbody>
         </table>
       </div>
     </main>
@@ -161,165 +166,52 @@
 </div>
 
 <script>
-      // Toggle Handlers
- const themeBtn = document.getElementById("themeToggle");
-const moonIcon = document.getElementById("moonIcon");
-const sunIcon  = document.getElementById("sunIcon");
-const modeToggle = document.getElementById("modeToggle");
-
-// --- Theme functions ---
-function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme); // save theme
+// Theme toggle
+const themeBtn = document.getElementById('themeToggle');
+const moonIcon = document.getElementById('moonIcon');
+const sunIcon = document.getElementById('sunIcon');
+function setTheme(theme){
+  document.body.dataset.theme = theme;
+  localStorage.setItem('theme', theme);
   const dark = theme === 'dark';
-  moonIcon.style.display = dark ? 'none' : 'block';
-  sunIcon.style.display  = dark ? 'block' : 'none';
+  moonIcon.style.display = dark ? 'none':'block';
+  sunIcon.style.display = dark ? 'block':'none';
+  refreshChartTheme();
 }
-
-// Toggle dark/light
-themeBtn.addEventListener("click", () => {
-  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  setTheme(current === 'dark' ? 'light' : 'dark');
-  refreshChartTheme();   // ✅ make charts update colors
+themeBtn.addEventListener('click',()=>{
+  setTheme(document.body.dataset.theme==='dark'?'light':'dark');
 });
+setTheme(localStorage.getItem('theme')||'light');
 
-
-// Apply saved theme on page load
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
-
-// --- Online/Offline functions ---
-function setMode(mode) {
-  modeToggle.checked = (mode === 'online'); // checked = online
-  localStorage.setItem('mode', mode);
-  // You can add any logic to load page-specific data here
-  // For example: fetchSettingsData(mode);
+// Data from backend
+const stats = JSON.parse(`{{ stats|tojson | safe }}`);
+const chartData = JSON.parse(`{{ chart_data|tojson | safe }}`);
+// Build charts
+const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+const pieCtx = document.getElementById('revenuePieChart').getContext('2d');
+const chartTextColour = () => getComputedStyle(document.body).getPropertyValue('--text').trim();
+const gridColour = () => getComputedStyle(document.body).getPropertyValue('--border').trim();
+let revenueLineChart = new Chart(lineCtx, {
+  type:'line',
+  data:{ labels: chartData.line.map((_,i)=>`E${i+1}`), datasets:[{label:'Revenue', data: chartData.line, borderColor:getComputedStyle(document.body).getPropertyValue('--brand').trim(), fill:false, tension:.35, pointRadius:3}]},
+  options:{ plugins:{ legend:{ labels:{ color: chartTextColour() } } }, scales:{ x:{ ticks:{ color:chartTextColour() }, grid:{ color:gridColour() } }, y:{ ticks:{ color:chartTextColour() }, grid:{ color:gridColour() } } } }
+});
+let revenuePieChart = new Chart(pieCtx, {
+  type:'doughnut',
+  data:{ labels:['Sponsors','Other'], datasets:[{ data: chartData.pie, backgroundColor:[getComputedStyle(document.body).getPropertyValue('--brand').trim(),'#6366f1'] }]},
+  options:{ plugins:{ legend:{ labels:{ color: chartTextColour() } } } }
+});
+function refreshChartTheme(){
+  const t=chartTextColour(), g=gridColour();
+  revenueLineChart.options.scales.x.ticks.color=t;
+  revenueLineChart.options.scales.y.ticks.color=t;
+  revenueLineChart.options.scales.x.grid.color=g;
+  revenueLineChart.options.scales.y.grid.color=g;
+  revenueLineChart.options.plugins.legend.labels.color=t;
+  revenuePieChart.options.plugins.legend.labels.color=t;
+  revenueLineChart.update();
+  revenuePieChart.update();
 }
-
-// Toggle online/offline
-modeToggle.addEventListener("change", function() {
-  const mode = this.checked ? 'online' : 'offline';
-  setMode(mode);
-  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
-});
-
-// Apply saved mode on page load
-const savedMode = localStorage.getItem('mode') || 'offline';
-setMode(savedMode);
-  const fmtINR = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
-  const fmtINRwithSymbol = (n) => `₹${fmtINR(n)}`;
-  function animateNumber(el, to, {prefix="₹", duration=800} = {}) {
-    const from = parseInt((el.textContent || "0").replace(/\D/g,'')) || 0;
-    const start = performance.now();
-    function frame(now) {
-      const p = Math.min((now - start) / duration, 1);
-      const val = Math.round(from + (to - from) * p);
-      el.textContent = `${prefix}${fmtINR(val)}`;
-      if (p < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
-
-  const dataSets = {
-    online: {
-      stats: { total: 320000, avg: 40000, sponsor: 120000 },
-      line: [40000, 60000, 70000, 80000, 70000],
-      pie: [200000, 120000], // participants vs sponsors
-      table: [
-        {name: "AI Innovation Challenge", rev: 95000, sponsors: "₹40,000"},
-        {name: "FinTech Hack", rev: 78000, sponsors: "₹30,000"},
-        {name: "Open Source Sprint", rev: 45000, sponsors: "₹20,000"}
-      ]
-    },
-    offline: {
-      stats: { total: 130000, avg: 32500, sponsor: 50000 },
-      line: [20000, 30000, 25000, 30000, 25000],
-      pie: [80000, 50000],
-      table: [
-        {name: "Blockchain Builders", rev: 42000, sponsors: "₹15,000"},
-        {name: "HealthTech Hack", rev: 35000, sponsors: "₹20,000"},
-        {name: "GreenTech Challenge", rev: 28000, sponsors: "₹15,000"}
-      ]
-    }
-  };
-
-  const lineCtx = document.getElementById("revenueLineChart").getContext("2d");
-  const pieCtx  = document.getElementById("revenuePieChart").getContext("2d");
-
-  const chartTextColour = () => getComputedStyle(document.body).getPropertyValue('--text').trim() || '#1f2937';
-  const gridColour = () => getComputedStyle(document.body).getPropertyValue('--border').trim() || '#e5e7eb';
-
-  let revenueLineChart = new Chart(lineCtx, {
-    type: 'line',
-    data: { labels: ["D1","D2","D3","D4","D5"], datasets: [{
-      label: "Revenue",
-      data: dataSets.offline.line,
-      borderColor: getComputedStyle(document.body).getPropertyValue('--brand').trim(),
-      fill: false, tension: 0.35, pointRadius: 3
-    }]},
-    options: {
-      plugins: { legend: { labels: { color: chartTextColour() } } },
-      scales: {
-        x: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } },
-        y: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } }
-      }
-    }
-  });
-
-  let revenuePieChart = new Chart(pieCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ["Participants", "Sponsors"],
-      datasets: [{ data: dataSets.offline.pie,
-        backgroundColor: [getComputedStyle(document.body).getPropertyValue('--brand').trim(), '#6366f1']
-      }]
-    },
-    options: { plugins: { legend: { labels: { color: chartTextColour() } } } }
-  });
-
-  function refreshChartTheme() {
-    const t = chartTextColour(), g = gridColour();
-    revenueLineChart.options.scales.x.ticks.color = t;
-    revenueLineChart.options.scales.y.ticks.color = t;
-    revenueLineChart.options.scales.x.grid.color = g;
-    revenueLineChart.options.scales.y.grid.color = g;
-    revenueLineChart.options.plugins.legend.labels.color = t;
-    revenuePieChart.options.plugins.legend.labels.color = t;
-    revenueLineChart.update();
-    revenuePieChart.update();
-  }
-
-  function updateStats(mode) {
-    const s = dataSets[mode].stats;
-    animateNumber(document.getElementById("totalRevenue"), s.total);
-    animateNumber(document.getElementById("avgRevenue"), s.avg);
-    animateNumber(document.getElementById("sponsorRevenue"), s.sponsor);
-  }
-
-  function updateTable(mode) {
-    const tbody = document.querySelector("#revenueTable tbody");
-    tbody.innerHTML = "";
-    dataSets[mode].table.forEach((item, idx) => {
-      tbody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td>${idx+1}</td>
-          <td>${item.name}</td>
-          <td>₹${fmtINR(item.rev)}</td>
-          <td>${item.sponsors}</td>
-        </tr>
-      `);
-    });
-  }
-
-  function updateCharts(mode) {
-    revenueLineChart.data.datasets[0].data = dataSets[mode].line;
-    revenuePieChart.data.datasets[0].data = dataSets[mode].pie;
-    revenueLineChart.update();
-    revenuePieChart.update();
-  }
-
-
-
 </script>
 </body>
 </html>

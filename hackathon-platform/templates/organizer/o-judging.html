@@ -68,13 +68,13 @@
     <aside class="col-lg-2 sidebar">
       <h4 class="mb-4" style="color:var(--brand)">Organizer</h4>
       <nav class="nav flex-column">
-        <a class="nav-link" href="o-index.html">Dashboard</a>
-        <a class="nav-link" href="o-events.html">Events</a>
-        <a class="nav-link" href="o-teams.html">Teams</a>
-        <a class="nav-link" href="o-participants.html">Participants</a>
-        <a class="nav-link" href="o-revenue.html">Revenue</a>
-        <a class="nav-link active" href="o-judging.html">Judging</a>
-        <a class="nav-link" href="o-settings.html">Settings</a>
+        <a class="nav-link" href="{{ url_for('organizer.dashboard') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('organizer.events_page') }}">Events</a>
+        <a class="nav-link" href="{{ url_for('organizer.teams_page') }}">Teams</a>
+        <a class="nav-link" href="{{ url_for('organizer.participants_page') }}">Participants</a>
+        <a class="nav-link" href="{{ url_for('organizer.revenue_page') }}">Revenue</a>
+        <a class="nav-link active" href="{{ url_for('organizer.judging_page') }}">Judging</a>
+        <a class="nav-link" href="{{ url_for('organizer.settings_page') }}">Settings</a>
       </nav>
     </aside>
 
@@ -84,12 +84,6 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="m-0">Judging Analytics</h2>
         <div class="d-flex align-items-center gap-3">
-          <!-- Online/Offline toggle -->
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="modeToggle">
-            <label class="form-check-label muted" for="modeToggle">Offline / Online</label>
-          </div>
-          <!-- Dark/Light toggle -->
           <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light">
             <svg id="moonIcon" viewBox="0 0 24 24">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -107,19 +101,19 @@
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Total Judges</div>
-            <h3 class="mt-1" id="totalJudges">0</h3>
+            <h3 class="mt-1" id="totalJudges">{{ stats.total_judges }}</h3>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Evaluations Completed</div>
-            <h3 class="mt-1" id="evaluations">0</h3>
+            <h3 class="mt-1" id="evaluations">{{ stats.evaluations }}</h3>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card p-3">
             <div class="muted small">Pending Reviews</div>
-            <h3 class="mt-1" id="pending">0</h3>
+            <h3 class="mt-1" id="pending">{{ stats.pending }}</h3>
           </div>
         </div>
       </div>
@@ -152,7 +146,18 @@
               <th class="muted">Avg Score Given</th>
             </tr>
           </thead>
-          <tbody><!-- dynamic --></tbody>
+          <tbody>
+          {% for row in judge_rows %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ row.judge_name }}</td>
+              <td>{{ row.evals }}</td>
+              <td>{{ row.avg_score }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center text-muted">No judging data available.</td></tr>
+          {% endfor %}
+          </tbody>
         </table>
       </div>
     </main>
@@ -161,166 +166,46 @@
 
 <script>
     // Toggle Handlers
-  const themeBtn = document.getElementById("themeToggle");
-const moonIcon = document.getElementById("moonIcon");
-const sunIcon  = document.getElementById("sunIcon");
-const modeToggle = document.getElementById("modeToggle");
-
-// --- Theme functions ---
-function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme); // save theme
-  const dark = theme === 'dark';
-  moonIcon.style.display = dark ? 'none' : 'block';
-  sunIcon.style.display  = dark ? 'block' : 'none';
-}
-
-// Toggle dark/light
-themeBtn.addEventListener("click", () => {
-  const current = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  setTheme(current === 'dark' ? 'light' : 'dark');
-  refreshChartTheme();   // ✅ make charts update colors
-});
-
-
-// Apply saved theme on page load
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
-
-// --- Online/Offline functions ---
-function setMode(mode) {
-  modeToggle.checked = (mode === 'online'); // checked = online
-  localStorage.setItem('mode', mode);
-  // You can add any logic to load page-specific data here
-  // For example: fetchSettingsData(mode);
-}
-
-// Toggle online/offline
-modeToggle.addEventListener("change", function() {
-  const mode = this.checked ? 'online' : 'offline';
-  setMode(mode);
-  alert(`Switched to ${mode.charAt(0).toUpperCase() + mode.slice(1)} mode`);
-});
-
-// Apply saved mode on page load
-const savedMode = localStorage.getItem('mode') || 'offline';
-setMode(savedMode);
-  const fmtINR = (n) => new Intl.NumberFormat('en-IN').format(Math.round(n));
-  function animateNumber(el, to, {duration=800} = {}) {
-    const from = parseInt((el.textContent || "0").replace(/\D/g,'')) || 0;
-    const start = performance.now();
-    function frame(now) {
-      const p = Math.min((now - start) / duration, 1);
-      const val = Math.round(from + (to - from) * p);
-      el.textContent = fmtINR(val);
-      if (p < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+  const themeBtn = document.getElementById('themeToggle');
+  const moonIcon = document.getElementById('moonIcon');
+  const sunIcon = document.getElementById('sunIcon');
+  function setTheme(theme){
+    document.body.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+    const dark = theme==='dark';
+    moonIcon.style.display = dark?'none':'block';
+    sunIcon.style.display = dark?'block':'none';
+    refreshChartTheme();
   }
-
-  const dataSets = {
-    online: {
-      stats: { judges: 15, evaluations: 350, pending: 40 },
-      line: [40, 60, 80, 100, 70],
-      pie: [120, 100, 80, 50], // per judge load
-      table: [
-        {name: "Dr. Meera Sharma", evals: 95, avg: "8.7"},
-        {name: "Rajesh Kumar", evals: 85, avg: "8.2"},
-        {name: "Anita Desai", evals: 70, avg: "7.9"}
-      ]
-    },
-    offline: {
-      stats: { judges: 10, evaluations: 180, pending: 25 },
-      line: [20, 30, 40, 50, 40],
-      pie: [60, 50, 40, 30],
-      table: [
-        {name: "Prof. Arvind Rao", evals: 65, avg: "8.1"},
-        {name: "Sneha Patil", evals: 55, avg: "7.8"},
-        {name: "Karan Singh", evals: 45, avg: "8.5"}
-      ]
-    }
-  };
-
-  const lineCtx = document.getElementById("judgeLineChart").getContext("2d");
-  const pieCtx  = document.getElementById("judgePieChart").getContext("2d");
-
-  const chartTextColour = () => getComputedStyle(document.body).getPropertyValue('--text').trim();
-  const gridColour = () => getComputedStyle(document.body).getPropertyValue('--border').trim();
-
+  themeBtn.addEventListener('click', ()=> setTheme(document.body.dataset.theme==='dark'?'light':'dark'));
+  setTheme(localStorage.getItem('theme')||'light');
+  // Backend injected data
+  const chartData = JSON.parse(`{{ chart_data|tojson | safe }}`);
+  const lineCtx = document.getElementById('judgeLineChart').getContext('2d');
+  const pieCtx = document.getElementById('judgePieChart').getContext('2d');
+  const chartTextColour = ()=> getComputedStyle(document.body).getPropertyValue('--text').trim();
+  const gridColour = ()=> getComputedStyle(document.body).getPropertyValue('--border').trim();
   let judgeLineChart = new Chart(lineCtx, {
-    type: 'line',
-    data: { labels: ["D1","D2","D3","D4","D5"], datasets: [{
-      label: "Evaluations",
-      data: dataSets.offline.line,
-      borderColor: getComputedStyle(document.body).getPropertyValue('--brand').trim(),
-      fill: false, tension: 0.35, pointRadius: 3
-    }]},
-    options: {
-      plugins: { legend: { labels: { color: chartTextColour() } } },
-      scales: {
-        x: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } },
-        y: { ticks: { color: chartTextColour() }, grid: { color: gridColour() } }
-      }
-    }
+    type:'line',
+    data:{ labels: chartData.line.map((_,i)=>`J${i+1}`), datasets:[{ label:'Evaluations', data: chartData.line, borderColor:getComputedStyle(document.body).getPropertyValue('--brand').trim(), fill:false, tension:.35, pointRadius:3 }]},
+    options:{ plugins:{ legend:{ labels:{ color:chartTextColour() } } }, scales:{ x:{ ticks:{ color:chartTextColour() }, grid:{ color:gridColour() } }, y:{ ticks:{ color:chartTextColour() }, grid:{ color:gridColour() } } } }
   });
-
   let judgePieChart = new Chart(pieCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ["Judge A", "Judge B", "Judge C", "Judge D"],
-      datasets: [{ data: dataSets.offline.pie,
-        backgroundColor: [
-          getComputedStyle(document.body).getPropertyValue('--brand').trim(),
-          '#6366f1','#10b981','#f59e0b'
-        ]
-      }]
-    },
-    options: { plugins: { legend: { labels: { color: chartTextColour() } } } }
+    type:'doughnut',
+    data:{ labels: chartData.pie.map((_,i)=>`J${i+1}`), datasets:[{ data: chartData.pie, backgroundColor:[ getComputedStyle(document.body).getPropertyValue('--brand').trim(),'#6366f1','#10b981','#f59e0b','#0ea5e9','#9333ea' ] }]},
+    options:{ plugins:{ legend:{ labels:{ color:chartTextColour() } } } }
   });
-
-  function refreshChartTheme() {
-    const t = chartTextColour(), g = gridColour();
-    judgeLineChart.options.scales.x.ticks.color = t;
-    judgeLineChart.options.scales.y.ticks.color = t;
-    judgeLineChart.options.scales.x.grid.color = g;
-    judgeLineChart.options.scales.y.grid.color = g;
-    judgeLineChart.options.plugins.legend.labels.color = t;
-    judgePieChart.options.plugins.legend.labels.color = t;
+  function refreshChartTheme(){
+    const t=chartTextColour(), g=gridColour();
+    judgeLineChart.options.scales.x.ticks.color=t;
+    judgeLineChart.options.scales.y.ticks.color=t;
+    judgeLineChart.options.scales.x.grid.color=g;
+    judgeLineChart.options.scales.y.grid.color=g;
+    judgeLineChart.options.plugins.legend.labels.color=t;
+    judgePieChart.options.plugins.legend.labels.color=t;
     judgeLineChart.update();
     judgePieChart.update();
   }
-
-  function updateStats(mode) {
-    const s = dataSets[mode].stats;
-    animateNumber(document.getElementById("totalJudges"), s.judges);
-    animateNumber(document.getElementById("evaluations"), s.evaluations);
-    animateNumber(document.getElementById("pending"), s.pending);
-  }
-
-  function updateTable(mode) {
-    const tbody = document.querySelector("#judgeTable tbody");
-    tbody.innerHTML = "";
-    dataSets[mode].table.forEach((item, idx) => {
-      tbody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td>${idx+1}</td>
-          <td>${item.name}</td>
-          <td>${item.evals}</td>
-          <td>${item.avg}</td>
-        </tr>
-      `);
-    });
-  }
-
-  function updateCharts(mode) {
-    judgeLineChart.data.datasets[0].data = dataSets[mode].line;
-    judgePieChart.data.datasets[0].data = dataSets[mode].pie;
-    judgeLineChart.update();
-    judgePieChart.update();
-  }
-
-  
-
 </script>
 </body>
 </html>

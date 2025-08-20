@@ -203,3 +203,121 @@ def teams_page():
         teams = []
 
     return render_template("organizer/o-teams.html", teams=teams)
+
+
+@organizer_bp.route("/revenue")
+@login_required
+@roles_required("organizer")
+def revenue_page():
+    """Revenue analytics sourced from EventSponsors."""
+    user_id, _ = get_current_user()
+    revenue_rows = []
+    total_revenue = 0.0
+    sponsor_total = 0.0
+    try:
+        sql = text(
+            """
+            SELECT e.event_id, e.name AS event_name,
+                   COALESCE(SUM(es.amount),0) AS sponsor_amount
+            FROM Events e
+            LEFT JOIN EventSponsors es ON es.event_id = e.event_id
+            WHERE e.created_by = :org_id
+            GROUP BY e.event_id, e.name
+            ORDER BY e.start_date DESC
+            """
+        )
+        rows = db.session.execute(sql, {"org_id": user_id}).mappings().all()
+        for r in rows:
+            amt = float(r.get("sponsor_amount") or 0.0)
+            sponsor_total += amt
+            revenue_rows.append({
+                "event_name": r.get("event_name"),
+                "sponsor_amount": amt,
+            })
+        total_revenue = sponsor_total  # If later you add ticket sales, adjust here
+    except Exception:
+        revenue_rows = []
+    events_count = len(revenue_rows) or 1
+    avg_revenue = total_revenue / events_count
+    # Simple chart datasets (line uses amounts order, pie sponsors vs remainder)
+    chart_data = {
+        "line": [row["sponsor_amount"] for row in revenue_rows][:10],
+        "pie": [sponsor_total, max(total_revenue - sponsor_total, 0)],
+    }
+    stats = {
+        "total_revenue": total_revenue,
+        "avg_revenue": avg_revenue,
+        "sponsor_total": sponsor_total,
+    }
+    return render_template("organizer/o-revenue.html", revenue_rows=revenue_rows, stats=stats, chart_data=chart_data)
+
+
+@organizer_bp.route("/judging")
+@login_required
+@roles_required("organizer")
+def judging_page():
+    """Judging analytics from JudgingScores and judge users."""
+    user_id, _ = get_current_user()
+    total_judges = 0
+    evaluations = 0
+    pending = 0
+    judge_rows = []
+    try:
+        # Count judges
+        judges_sql = text("SELECT COUNT(*) AS cnt FROM Users WHERE role = 'judge'")
+        jr = db.session.execute(judges_sql).first()
+        total_judges = int(jr.cnt) if jr and jr.cnt is not None else 0
+        # Evaluations aggregate
+        eval_sql = text("SELECT COUNT(*) AS cnt FROM JudgingScores")
+        er = db.session.execute(eval_sql).first()
+        evaluations = int(er.cnt) if er and er.cnt is not None else 0
+        # Teams under this organizer (potential workload proxy)
+        team_sql = text(
+            """
+            SELECT COUNT(*) AS cnt
+            FROM Teams t JOIN Events e ON e.event_id = t.event_id
+            WHERE e.created_by = :org_id
+            """
+        )
+        tr = db.session.execute(team_sql, {"org_id": user_id}).first()
+        teams_count = int(tr.cnt) if tr and tr.cnt is not None else 0
+        potential = total_judges * teams_count
+        pending = max(potential - evaluations, 0)
+        # Judge performance rows
+        performance_sql = text(
+            """
+            SELECT u.user_id, u.name AS judge_name,
+                   COUNT(js.score_id) AS evals,
+                   COALESCE(ROUND(AVG(js.score),2),0) AS avg_score
+            FROM Users u
+            LEFT JOIN JudgingScores js ON js.judge_id = u.user_id
+            WHERE u.role = 'judge'
+            GROUP BY u.user_id, u.name
+            ORDER BY evals DESC
+            """
+        )
+        prow = db.session.execute(performance_sql).mappings().all()
+        for r in prow:
+            judge_rows.append({
+                "judge_name": r.get("judge_name"),
+                "evals": int(r.get("evals") or 0),
+                "avg_score": r.get("avg_score") or 0,
+            })
+    except Exception:
+        judge_rows = []
+    stats = {
+        "total_judges": total_judges,
+        "evaluations": evaluations,
+        "pending": pending,
+    }
+    line_vals = [r["evals"] for r in judge_rows][:10]
+    pie_vals = [r["evals"] for r in judge_rows[:4]]
+    chart_data = {"line": line_vals, "pie": pie_vals}
+    return render_template("organizer/o-judging.html", stats=stats, judge_rows=judge_rows, chart_data=chart_data)
+
+
+@organizer_bp.route("/settings")
+@login_required
+@roles_required("organizer")
+def settings_page():
+    return render_template("organizer/o-settings.html")
